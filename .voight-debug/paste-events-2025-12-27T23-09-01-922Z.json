@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2025-12-27T23:10:43.808Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 472,
+    "completeText": "            // Store file path directly on the element to avoid closure issues\n            itemDiv._filePath = file.filePath;\n\n            // Add click handler directly to element\n            itemDiv.addEventListener('click', function(e) {\n                e.stopPropagation();\n                console.log('File list item clicked:', this._filePath);\n                vscode.postMessage({\n                    command: 'openFile',\n                    filePath: this._filePath\n",
+    "rangeStart": {
+      "line": 252,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 257,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766877043808,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T23:11:07.269Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 542,
+    "completeText": "        // Filter: Show all segments from the currently active file\n        // Note: The 5-minute time filter is only for badge count, not for display\n        const filteredBlocks = blocks.filter((block: HighlightSegment) => {\n            // Only show segments from the active file\n            if (block.filePath !== activeFilePath) {\n                Logger.debug(`  Block ${block.id} filtered out: file path mismatch`);\n                return false;\n            }\n\n            Logger.debug(`  Block ${block.id} included: from active file`);\n",
+    "rangeStart": {
+      "line": 263,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 294,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 23461,
+    "documentVersion": 2
+  }
+]

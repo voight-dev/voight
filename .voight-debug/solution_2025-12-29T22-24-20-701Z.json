@@ -1,0 +1,25 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 417,
+      "line_number_end": 425,
+      "code": "                // Active file has no segments - keep showing last viewed file\n                // This prevents jarring view switches when navigating through files\n                if (this._lastViewedFilePath && blocks.some(b => b.filePath === this._lastViewedFilePath)) {\n                    fileToShow = this._lastViewedFilePath;\n                    Logger.debug(`[SegmentsWebviewProvider] Active file has no segments, keeping last viewed file`);\n                } else {\n                    // No last viewed file or it no longer has segments, default to first file with segments\n                    fileToShow = undefined;\n                    Logger.debug(`[SegmentsWebviewProvider] Active file has no segments and no last viewed file`);",
+      "timestamp": "2025-12-29T22:26:00.299Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 1,
+      "line_number_start": 435,
+      "line_number_end": 435,
+      "code": "        if (!fileToShow && blocks.length > 0) {",
+      "timestamp": "2025-12-29T22:28:11.541Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-29T22-24-20-701Z",
+    "totalBlocks": 2,
+    "lastUpdated": "2025-12-29T22:28:11.542Z"
+  }
+}

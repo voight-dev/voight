@@ -1,0 +1,164 @@
+[
+  {
+    "timestamp": "2025-12-29T22:07:52.460Z",
+    "file": "/Users/swarit-dev/voight/src/ui/highlighter.ts",
+    "detected": true,
+    "textLength": 57,
+    "completeText": "    DISMISSED = 'dismissed'    // User dismissed/ignored\n",
+    "rangeStart": {
+      "line": 33,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 35,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1767046072460,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T22:08:07.126Z",
+    "file": "/Users/swarit-dev/voight/src/ui/highlighter.ts",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 292,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 298,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 14666,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-29T22:08:31.498Z",
+    "file": "/Users/swarit-dev/voight/src/ui/blockManager.ts",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 5,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 6,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 24372,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T22:08:52.777Z",
+    "file": "/Users/swarit-dev/voight/src/ui/blockManager.ts",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 231,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 319,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 21279,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-29T22:09:11.776Z",
+    "file": "/Users/swarit-dev/voight/src/ui/blockManager.ts",
+    "detected": true,
+    "textLength": 903,
+    "completeText": "    } {\n        return {\n            total: this.highlighter.getSegmentsByState(SegmentState.DETECTED).length +\n                   this.highlighter.getSegmentsByState(SegmentState.REVIEWED).length +\n                   this.highlighter.getSegmentsByState(SegmentState.FLAGGED).length +\n                   this.highlighter.getSegmentsByState(SegmentState.ACCEPTED).length +\n                   this.highlighter.getSegmentsByState(SegmentState.DISMISSED).length,\n            detected: this.highlighter.getSegmentsByState(SegmentState.DETECTED).length,\n            reviewed: this.highlighter.getSegmentsByState(SegmentState.REVIEWED).length,\n            flagged: this.highlighter.getSegmentsByState(SegmentState.FLAGGED).length,\n            accepted: this.highlighter.getSegmentsByState(SegmentState.ACCEPTED).length,\n            dismissed: this.highlighter.getSegmentsByState(SegmentState.DISMISSED).length\n",
+    "rangeStart": {
+      "line": 252,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 267,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 18999,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-29T22:09:39.393Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 148,
+    "completeText": "\t\t\t`Blocks: ${stats.total} total | ${stats.detected} detected | ${stats.reviewed} reviewed | ${stats.flagged} flagged | ${stats.accepted} accepted`\n",
+    "rangeStart": {
+      "line": 119,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 120,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 27617,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T22:09:53.562Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 315,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 330,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 14169,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-29T22:10:08.592Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 329,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 330,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 15030,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-29T22:10:17.616Z",
+    "file": "/Users/swarit-dev/voight/package.json",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 77,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 81,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 9024,
+    "documentVersion": 2
+  }
+]

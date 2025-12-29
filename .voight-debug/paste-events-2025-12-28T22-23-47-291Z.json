@@ -1,0 +1,56 @@
+[
+  {
+    "timestamp": "2025-12-28T22:27:56.146Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 68,
+    "completeText": "    let displayedSegments = []; // Sorted segments in display order\n",
+    "rangeStart": {
+      "line": 8,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 8,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1766960876146,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T22:28:23.524Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 215,
+    "completeText": "        // Sort segments based on current sort mode and store for auto-advance\n        displayedSegments = sortSegments([...segments], currentSort);\n\n        container.innerHTML = displayedSegments.map(segment => {\n",
+    "rangeStart": {
+      "line": 77,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 81,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 27378,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-28T22:29:03.589Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 1703,
+    "completeText": "        // Find the current segment index in the DISPLAYED (sorted) order\n        const currentIndex = displayedSegments.findIndex(s => s.id === segmentId);\n\n        // Find the card element\n        const card = document.querySelector(`.segment-card[data-segment-id=\"${segmentId}\"]`);\n        if (!card) return;\n\n        // Add dismissing class to trigger animation\n        card.classList.add('dismissing');\n\n        // Wait for animation to complete before removing from DOM and notifying backend\n        setTimeout(() => {\n            // Remove from DOM\n            card.remove();\n\n            // Remove from both arrays\n            segments = segments.filter(s => s.id !== segmentId);\n            displayedSegments = displayedSegments.filter(s => s.id !== segmentId);\n\n            // Update segment count\n            const countEl = document.getElementById('segment-count');\n            if (countEl) {\n                countEl.textContent = segments.length === 0\n                    ? 'No segments'\n                    : `${segments.length} segment${segments.length !== 1 ? 's' : ''}`;\n            }\n\n            // Notify backend\n            vscode.postMessage({\n                command: 'dismissSegment',\n                segmentId\n            });\n\n            // Auto-advance: Navigate to next segment in DISPLAY ORDER\n            if (displayedSegments.length > 0) {\n                // After removing current segment, if currentIndex >= length, wrap to 0\n                // Otherwise, currentIndex now points to what was the next segment\n                const nextIndex = currentIndex >= displayedSegments.length ? 0 : currentIndex;\n                const nextSegment = displayedSegments[nextIndex];\n",
+    "rangeStart": {
+      "line": 387,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 424,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 40065,
+    "documentVersion": 4
+  }
+]

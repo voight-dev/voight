@@ -1,0 +1,49 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 109,
+      "line_number_end": 113,
+      "code": "                            class=\"vk-icon-button dismiss-btn\"\n                            title=\"Dismiss without review\">\n                            <span class=\"codicon codicon-close\"></span>\n                        </button>\n                        <button",
+      "timestamp": "2025-12-27T23:34:45.386Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 1,
+      "line_number_start": 914,
+      "line_number_end": 925,
+      "code": "        // Handle Dismiss button\n        const dismissBtn = target.closest('.dismiss-btn');\n        if (dismissBtn) {\n            const card = dismissBtn.closest('[data-segment-id]');\n            if (card) {\n                e.preventDefault();\n                const segmentId = card.dataset.segmentId;\n                dismissSegment(segmentId);\n            }\n            return;\n        }\n",
+      "timestamp": "2025-12-27T23:35:10.676Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 263,
+      "line_number_end": 264,
+      "code": "        // Filter: Show all segments from the currently active file, except reviewed/dismissed ones\n        // Exception: Always show starred or segments with context notes",
+      "timestamp": "2025-12-27T23:35:48.644Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 272,
+      "line_number_end": 283,
+      "code": "            // Check if segment is reviewed or dismissed\n            const isReviewedOrDismissed = block.state === SegmentState.REVIEWED || block.state === SegmentState.DISMISSED;\n\n            // Always show if starred or has context (even if reviewed/dismissed)\n            const hasContext = block.metadata?.context && block.metadata.context.trim().length > 0;\n            const isStarred = block.metadata?.isStarred === true;\n\n            if (isReviewedOrDismissed && !hasContext && !isStarred) {\n                Logger.debug(`  Block ${block.id} filtered out: reviewed/dismissed without star or context`);\n                return false;\n            }\n",
+      "timestamp": "2025-12-27T23:35:48.644Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 7,
+      "line_number_end": 7,
+      "code": "import { HighlightSegment, SegmentState } from './highlighter';",
+      "timestamp": "2025-12-27T23:36:06.649Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-27T23-27-58-269Z",
+    "totalBlocks": 5,
+    "lastUpdated": "2025-12-27T23:36:06.649Z"
+  }
+}

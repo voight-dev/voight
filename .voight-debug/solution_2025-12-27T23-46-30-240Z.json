@@ -1,0 +1,49 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 233,
+      "line_number_end": 233,
+      "code": "/* Glass-like highlight for selected segments (cursor is in this code) */",
+      "timestamp": "2025-12-27T23:48:44.967Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 235,
+      "line_number_end": 235,
+      "code": "    background: rgba(52, 199, 89, 0.08);",
+      "timestamp": "2025-12-27T23:48:44.967Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 239,
+      "line_number_end": 239,
+      "code": "    background: rgba(255, 159, 10, 0.08);",
+      "timestamp": "2025-12-27T23:48:44.967Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 6,
+      "line_number_start": 243,
+      "line_number_end": 243,
+      "code": "    background: rgba(255, 69, 58, 0.08);",
+      "timestamp": "2025-12-27T23:48:44.967Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 8,
+      "line_number_start": 247,
+      "line_number_end": 247,
+      "code": "    background: rgba(142, 142, 147, 0.08);",
+      "timestamp": "2025-12-27T23:48:44.967Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-27T23-46-30-240Z",
+    "totalBlocks": 5,
+    "lastUpdated": "2025-12-27T23:48:44.969Z"
+  }
+}

@@ -1,0 +1,236 @@
+[
+  {
+    "timestamp": "2025-12-29T01:10:23.591Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/functionBoundaryDetector.ts",
+    "detected": true,
+    "textLength": 96,
+    "completeText": "        console.warn(`[BoundaryDetector] ✗ Could not find Python function: \"${functionName}\"`);\n",
+    "rangeStart": {
+      "line": 123,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 123,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1766970623591,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T01:42:07.694Z",
+    "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts",
+    "detected": true,
+    "textLength": 1695,
+    "completeText": "        // Create a map of boundaries by function name for O(1) lookup\n        const boundaryMap = new Map<string, typeof boundaries[0]>();\n        boundaries.forEach(boundary => {\n            boundaryMap.set(boundary.name, boundary);\n        });\n\n        // Use detected boundaries or fall back to simple distribution\n        for (let i = 0; i < functions.length; i++) {\n            const func = functions[i];\n            // Match boundary by NAME, not by index!\n            const boundary = boundaryMap.get(func.name);\n\n            Logger.debug(`[Function Splitting] Processing function \"${func.name}\": ${boundary ? `found boundary at ${boundary.startLine}-${boundary.endLine}` : 'no boundary found'}`);\n\n            let functionStart: number;\n            let functionEnd: number;\n\n            if (boundary) {\n                // Use detected boundary\n                functionStart = expanded.start + boundary.startLine;\n                functionEnd = expanded.start + boundary.endLine;\n                Logger.debug(`    ✓ Using detected boundary: lines ${functionStart}-${functionEnd}`);\n            } else {\n                // Fallback: distribute evenly (this won't be accurate but better than nothing)\n                const totalLines = expanded.end - expanded.start + 1;\n                const linesPerFunc = Math.floor(totalLines / functions.length);\n                functionStart = expanded.start + (i * linesPerFunc);\n                functionEnd = (i === functions.length - 1)\n                    ? expanded.end\n                    : functionStart + linesPerFunc - 1;\n                Logger.warn(`    ⚠️  No boundary found, using estimated range: lines ${functionStart}-${functionEnd}`);\n",
+    "rangeStart": {
+      "line": 362,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 389,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1904103,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T03:54:00.932Z",
+    "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts",
+    "detected": true,
+    "textLength": 445,
+    "completeText": "            // DON'T update shadow yet - we need to detect changes first!\n            // The shadow will be updated after detectChanges is called\n            Logger.debug(`ChangeDetector: Found new file ${filePath} (hasContent: ${hasContent})`);\n\n            return hasContent; // Return true if we should detect this as new content\n        }\n\n        // Already tracked\n        Logger.debug(`ChangeDetector: File already tracked ${filePath}`);\n",
+    "rangeStart": {
+      "line": 65,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 71,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 7913238,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-29T04:23:22.122Z",
+    "file": "/Users/swarit-dev/voight/package.json",
+    "detected": true,
+    "textLength": 520,
+    "completeText": "        \"voight.detection.excludePatterns\": {\n          \"type\": \"array\",\n          \"default\": [\n            \"**/*.min.js\",\n            \"**/*.min.css\",\n            \"**/dist/**\",\n            \"**/build/**\",\n            \"**/node_modules/**\",\n            \"**/.git/**\"\n          ],\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"File patterns to exclude from detection (supports glob patterns like **/*.css or **/test/**). Use ! prefix for regex (e.g., !/test\\\\d+\\\\.js$/)\"\n        },\n",
+    "rangeStart": {
+      "line": 116,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 116,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1761190,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T04:38:04.786Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 793,
+    "completeText": "import { FilePatternMatcher } from '../utils/filePatternMatcher';\n\n/**\n * Coordinates detection, UI updates, and debug logging\n * This is the main entry point for the detection system\n */\nexport class DetectionCoordinator {\n    private _changeDetector: ChangeDetector;\n    private _pasteDetector: PasteDetector;\n    private _blockManager?: BlockManager;\n    private _debugLogger?: DebugLogger;\n    private _filePatternMatcher: FilePatternMatcher;\n\n    constructor(\n        blockManager?: BlockManager,\n        debugLogger?: DebugLogger\n    ) {\n        this._changeDetector = new ChangeDetector();\n        this._pasteDetector = new PasteDetector();\n        this._blockManager = blockManager;\n        this._debugLogger = debugLogger;\n        this._filePatternMatcher = new FilePatternMatcher();\n",
+    "rangeStart": {
+      "line": 6,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 25,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 882664,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T04:38:19.046Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 246,
+    "completeText": "        // Check if file should be excluded\n        if (this._filePatternMatcher.shouldExclude(document.fileName)) {\n            Logger.debug(`DetectionCoordinator: File excluded by pattern: ${document.fileName}`);\n            return;\n        }\n\n",
+    "rangeStart": {
+      "line": 41,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 41,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 14260,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-29T04:38:36.061Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 243,
+    "completeText": "\n        // Check if file should be excluded\n        if (this._filePatternMatcher.shouldExclude(filePath)) {\n            Logger.debug(`DetectionCoordinator: Change event ignored for excluded file: ${filePath}`);\n            return;\n        }\n\n",
+    "rangeStart": {
+      "line": 99,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 99,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 17015,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-29T20:16:53.009Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 247,
+    "completeText": "        // Show/hide bulk remove button\n        const bulkRemoveBtn = document.querySelector('.bulk-remove-btn');\n        if (bulkRemoveBtn) {\n            bulkRemoveBtn.style.display = segments && segments.length > 0 ? 'flex' : 'none';\n        }\n\n",
+    "rangeStart": {
+      "line": 63,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 63,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 56296948,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T20:17:21.693Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 1993,
+    "completeText": "    function bulkRemoveSegments() {\n        // Show subtle confirmation\n        const confirmEl = document.querySelector('.bulk-remove-confirm');\n        if (!confirmEl) return;\n\n        // Show confirmation\n        confirmEl.style.display = 'flex';\n\n        // Auto-hide after 10 seconds if no action taken\n        setTimeout(() => {\n            if (confirmEl.style.display === 'flex') {\n                confirmEl.style.display = 'none';\n            }\n        }, 10000);\n    }\n\n    function confirmBulkRemove() {\n        // Get all segment IDs\n        const allSegmentIds = segments.map(s => s.id);\n\n        // Hide confirmation\n        const confirmEl = document.querySelector('.bulk-remove-confirm');\n        if (confirmEl) {\n            confirmEl.style.display = 'none';\n        }\n\n        // Animate all cards out\n        const allCards = document.querySelectorAll('.segment-card');\n        allCards.forEach(card => card.classList.add('dismissing'));\n\n        // Wait for animation then clean up\n        setTimeout(() => {\n            // Clear arrays\n            segments = [];\n            displayedSegments = [];\n\n            // Update UI\n            const countEl = document.getElementById('segment-count');\n            if (countEl) {\n                countEl.textContent = 'No segments';\n            }\n\n            // Hide bulk remove button\n            const bulkRemoveBtn = document.querySelector('.bulk-remove-btn');\n            if (bulkRemoveBtn) {\n                bulkRemoveBtn.style.display = 'none';\n            }\n\n            // Re-render to show empty state\n            renderSegments();\n\n            // Notify backend\n            vscode.postMessage({\n                command: 'bulkRemoveSegments',\n                segmentIds: allSegmentIds\n            });\n        }, 300);\n    }\n\n    function cancelBulkRemove() {\n        const confirmEl = document.querySelector('.bulk-remove-confirm');\n        if (confirmEl) {\n            confirmEl.style.display = 'none';\n        }\n    }\n\n",
+    "rangeStart": {
+      "line": 447,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 447,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 28684,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-29T20:17:40.848Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 700,
+    "completeText": "\n        // Handle Bulk Remove button\n        const bulkRemoveBtn = target.closest('.bulk-remove-btn');\n        if (bulkRemoveBtn) {\n            e.preventDefault();\n            bulkRemoveSegments();\n            return;\n        }\n\n        // Handle Confirm Bulk Remove button\n        const confirmBtn = target.closest('.confirm-bulk-remove-btn');\n        if (confirmBtn) {\n            e.preventDefault();\n            confirmBulkRemove();\n            return;\n        }\n\n        // Handle Cancel Bulk Remove button\n        const cancelBtn = target.closest('.cancel-bulk-remove-btn');\n        if (cancelBtn) {\n            e.preventDefault();\n            cancelBulkRemove();\n            return;\n        }\n",
+    "rangeStart": {
+      "line": 1073,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 1073,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 19155,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-29T20:18:02.664Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1253,
+    "completeText": "                <div class=\"header-actions\">\n                    <button class=\"bulk-remove-btn\" style=\"display: none;\" title=\"Remove all segments\">\n                        <span class=\"codicon codicon-trash\"></span>\n                    </button>\n                    <div class=\"sort-controls\">\n                        <button class=\"sort-button active\" data-sort=\"line\" title=\"Sort by line number\">\n                            <span class=\"codicon codicon-list-ordered\"></span>\n                        </button>\n                        <button class=\"sort-button\" data-sort=\"complexity\" title=\"Sort by complexity\">\n                            <span class=\"codicon codicon-graph\"></span>\n                        </button>\n                    </div>\n                </div>\n            </div>\n            <div class=\"bulk-remove-confirm\" style=\"display: none;\">\n                <div class=\"bulk-remove-confirm-content\">\n                    <span class=\"bulk-remove-confirm-text\">Remove all segments?</span>\n                    <div class=\"bulk-remove-confirm-actions\">\n                        <button class=\"confirm-bulk-remove-btn\">Remove</button>\n                        <button class=\"cancel-bulk-remove-btn\">Cancel</button>\n                    </div>\n",
+    "rangeStart": {
+      "line": 713,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 720,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 21816,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T20:18:21.893Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1531,
+    "completeText": "\n                case 'bulkRemoveSegments':\n                    if (message.segmentIds && Array.isArray(message.segmentIds)) {\n                        Logger.debug(`[SegmentsWebviewProvider] Bulk removing ${message.segmentIds.length} segments`);\n\n                        // Remove all segments\n                        for (const segmentId of message.segmentIds) {\n                            const block = this._blockManager.getBlock(segmentId);\n                            if (block) {\n                                // Check if segment has star or context - preserve if yes\n                                const hasContext = block.metadata?.context && block.metadata.context.trim().length > 0;\n                                const isStarred = block.metadata?.isStarred === true;\n\n                                if (hasContext || isStarred) {\n                                    // Mark as reviewed but keep the segment\n                                    this._blockManager.markAsReviewed(segmentId);\n                                } else {\n                                    // No star or context - remove completely\n                                    this._blockManager.remove(segmentId);\n                                }\n                            }\n                        }\n\n                        // Update badge after bulk removal\n                        this._updateBadge();\n                        Logger.info(`[SegmentsWebviewProvider] Bulk removal complete`);\n                    }\n                    break;\n",
+    "rangeStart": {
+      "line": 193,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 193,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 19229,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-29T20:19:03.042Z",
+    "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css",
+    "detected": true,
+    "textLength": 2128,
+    "completeText": "/* Header actions - contains bulk remove button and sort controls */\n.header-actions {\n    display: flex;\n    align-items: center;\n    gap: 8px;\n}\n\n/* Bulk remove button - subtle, minimal design */\n.bulk-remove-btn {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    padding: 6px 10px;\n    background: transparent;\n    color: var(--vscode-descriptionForeground);\n    border: 1px solid var(--vscode-panel-border);\n    border-radius: 4px;\n    cursor: pointer;\n    transition: all 0.15s ease;\n    opacity: 0.6;\n}\n\n.bulk-remove-btn:hover {\n    opacity: 1;\n    background: var(--vscode-inputValidation-errorBackground);\n    color: var(--vscode-errorForeground);\n    border-color: var(--vscode-inputValidation-errorBorder);\n}\n\n.bulk-remove-btn .codicon {\n    font-size: 14px;\n}\n\n/* Bulk remove confirmation - subtle inline notification */\n.bulk-remove-confirm {\n    margin-top: 10px;\n    padding: 10px 12px;\n    background: var(--vscode-inputValidation-warningBackground);\n    border: 1px solid var(--vscode-inputValidation-warningBorder);\n    border-radius: 4px;\n    animation: slideDown 0.2s ease;\n}\n\n.bulk-remove-confirm-content {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    gap: 12px;\n}\n\n.bulk-remove-confirm-text {\n    font-size: 12px;\n    color: var(--vscode-inputValidation-warningForeground);\n    font-weight: 500;\n}\n\n.bulk-remove-confirm-actions {\n    display: flex;\n    gap: 6px;\n}\n\n.confirm-bulk-remove-btn,\n.cancel-bulk-remove-btn {\n    padding: 4px 10px;\n    font-size: 11px;\n    font-weight: 500;\n    border: none;\n    border-radius: 3px;\n    cursor: pointer;\n    transition: all 0.15s ease;\n}\n\n.confirm-bulk-remove-btn {\n    background: var(--vscode-button-background);\n    color: var(--vscode-button-foreground);\n}\n\n.confirm-bulk-remove-btn:hover {\n    background: var(--vscode-button-hoverBackground);\n}\n\n.cancel-bulk-remove-btn {\n    background: var(--vscode-button-secondaryBackground);\n    color: var(--vscode-button-secondaryForeground);\n}\n\n.cancel-bulk-remove-btn:hover {\n    background: var(--vscode-button-secondaryHoverBackground);\n}\n\n",
+    "rangeStart": {
+      "line": 85,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 85,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 41149,
+    "documentVersion": 2
+  }
+]

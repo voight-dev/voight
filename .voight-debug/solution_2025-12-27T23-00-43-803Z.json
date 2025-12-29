@@ -1,0 +1,57 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 233,
+      "line_number_end": 241,
+      "code": "        // Build file list items\n        const fileItems = files.map((file, index) => {\n            const itemDiv = document.createElement('div');\n            itemDiv.className = 'file-list-item';\n            itemDiv.dataset.fileIndex = index;\n\n            itemDiv.innerHTML = `\n                <div class=\"file-list-item-icon\">\n                    <span class=\"codicon codicon-file-code\"></span>",
+      "timestamp": "2025-12-27T23:08:27.546Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 253,
+      "line_number_end": 253,
+      "code": "            itemDiv.addEventListener('click', () => {",
+      "timestamp": "2025-12-27T23:08:27.546Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 248,
+      "line_number_end": 253,
+      "code": "                    <span class=\"codicon codicon-chevron-right\"></span>\n                </div>\n            `;\n\n            // Add click handler directly to element\n            itemDiv.addEventListener('click', () => {",
+      "timestamp": "2025-12-27T23:08:27.546Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 6,
+      "line_number_start": 256,
+      "line_number_end": 256,
+      "code": "                    filePath: file.filePath",
+      "timestamp": "2025-12-27T23:08:27.546Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 8,
+      "line_number_start": 259,
+      "line_number_end": 260,
+      "code": "\n            return itemDiv;",
+      "timestamp": "2025-12-27T23:08:27.546Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 10,
+      "line_number_start": 262,
+      "line_number_end": 272,
+      "code": "\n        // Clear and rebuild container\n        container.innerHTML = `\n            <div class=\"file-list-header\">\n                <div class=\"codicon codicon-info\"></div>\n                <p>No segments in current file. Click a file below to view its segments:</p>\n            </div>\n        `;\n\n        // Append file items\n        fileItems.forEach(item => container.appendChild(item));",
+      "timestamp": "2025-12-27T23:08:27.547Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-27T23-00-43-803Z",
+    "totalBlocks": 6,
+    "lastUpdated": "2025-12-27T23:08:27.548Z"
+  }
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voight UI Components Demo</title>
+
+    <!-- VSCode Codicons -->
+    <link rel="stylesheet" href="https://unpkg.com/@vscode/codicons@0.0.35/dist/codicon.css">
+
+    <!-- VSCode Theme Variables -->
+    <link rel="stylesheet" href="./vscode-theme.css">
+
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="../styles/base/index.css">
+
+    <!-- Demo Page Styles -->
+    <link rel="stylesheet" href="./demo.css">
+</head>
+<body data-vscode-theme-kind="vscode-dark">
+    <div class="demo-container">
+        <header class="demo-header">
+            <h1>Voight UI Components</h1>
+            <p>VSCode-native design system for code complexity visualization</p>
+
+            <div class="theme-toggle">
+                <button id="theme-toggle-btn" class="vk-button vk-button--secondary">
+                    <span class="codicon codicon-color-mode"></span>
+                    <span>Toggle Theme</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="demo-main">
+            <!-- Cards Section -->
+            <section class="demo-section">
+                <h2>Cards</h2>
+                <p class="demo-description">Flexible container components</p>
+                <div id="cards-demo" class="demo-grid"></div>
+            </section>
+
+            <!-- Badges Section -->
+            <section class="demo-section">
+                <h2>Badges</h2>
+                <p class="demo-description">Status indicators and labels</p>
+                <div id="badges-demo" class="demo-inline"></div>
+            </section>
+
+            <!-- Buttons Section -->
+            <section class="demo-section">
+                <h2>Buttons</h2>
+                <p class="demo-description">Interactive button components</p>
+                <div id="buttons-demo" class="demo-inline"></div>
+            </section>
+
+            <!-- Icon Buttons Section -->
+            <section class="demo-section">
+                <h2>Icon Buttons</h2>
+                <p class="demo-description">Compact icon-only buttons</p>
+                <div id="icon-buttons-demo" class="demo-inline"></div>
+            </section>
+
+            <!-- Collapse Section -->
+            <section class="demo-section">
+                <h2>Collapse</h2>
+                <p class="demo-description">Collapsible sections with smooth animations</p>
+                <div id="collapse-demo"></div>
+            </section>
+
+            <!-- Complete Example Section -->
+            <section class="demo-section">
+                <h2>Complete Example: Segment Card</h2>
+                <p class="demo-description">Fully composed segment card using all base components</p>
+                <div id="segment-demo"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Demo JavaScript - Renders all components -->
+    <script type="module" src="./demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+/**
+ * VSCode Theme Variables
+ * Simulates VSCode's color scheme for standalone demo
+ */
+
+/* Dark Theme (Default) */
+:root,
+body[data-vscode-theme-kind="vscode-dark"] {
+    --vscode-editor-background: #1e1e1e;
+    --vscode-editor-foreground: #d4d4d4;
+    --vscode-foreground: #cccccc;
+    --vscode-descriptionForeground: #999999;
+    --vscode-panel-border: #3e3e3e;
+    --vscode-sideBar-background: #252526;
+    --vscode-button-background: #0e639c;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #1177bb;
+    --vscode-button-secondaryBackground: #3a3d41;
+    --vscode-button-secondaryForeground: #cccccc;
+    --vscode-button-secondaryHoverBackground: #45494e;
+    --vscode-badge-background: #4d4d4d;
+    --vscode-badge-foreground: #ffffff;
+    --vscode-list-hoverBackground: #2a2d2e;
+    --vscode-list-activeSelectionBackground: #094771;
+    --vscode-focusBorder: #007fd4;
+    --vscode-toolbar-hoverBackground: #2a2d2e;
+    --vscode-toolbar-activeBackground: #094771;
+    --vscode-charts-blue: #3a96dd;
+    --vscode-charts-green: #49be8d;
+    --vscode-charts-orange: #da924a;
+    --vscode-charts-red: #ed6a5e;
+    --vscode-errorForeground: #f48771;
+    --vscode-inputValidation-errorBackground: #5a1d1d;
+    --vscode-inputValidation-errorBorder: #be1100;
+    --vscode-textCodeBlock-background: #0a0a0a;
+}
+
+/* Light Theme */
+body[data-vscode-theme-kind="vscode-light"] {
+    --vscode-editor-background: #ffffff;
+    --vscode-editor-foreground: #3b3b3b;
+    --vscode-foreground: #616161;
+    --vscode-descriptionForeground: #717171;
+    --vscode-panel-border: #e5e5e5;
+    --vscode-sideBar-background: #f3f3f3;
+    --vscode-button-background: #007acc;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #0062a3;
+    --vscode-button-secondaryBackground: #e5e5e5;
+    --vscode-button-secondaryForeground: #3b3b3b;
+    --vscode-button-secondaryHoverBackground: #d6d6d6;
+    --vscode-badge-background: #c4c4c4;
+    --vscode-badge-foreground: #3b3b3b;
+    --vscode-list-hoverBackground: #e8e8e8;
+    --vscode-list-activeSelectionBackground: #0060c0;
+    --vscode-focusBorder: #0090f1;
+    --vscode-toolbar-hoverBackground: #e8e8e8;
+    --vscode-toolbar-activeBackground: #0060c0;
+    --vscode-charts-blue: #1a7ecc;
+    --vscode-charts-green: #2d9574;
+    --vscode-charts-orange: #d67e3e;
+    --vscode-charts-red: #d74e42;
+    --vscode-errorForeground: #e51400;
+    --vscode-inputValidation-errorBackground: #ffeaea;
+    --vscode-inputValidation-errorBorder: #be1100;
+    --vscode-textCodeBlock-background: #f5f5f5;
+}
+
+/* Base body styles */
+body {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.2s, color 0.2s;
+}

@@ -1,0 +1,41 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 233,
+      "line_number_end": 240,
+      "code": "/* Subtle highlight for expanded/selected segments based on complexity */\n.segment-card.expanded[data-complexity=\"low\"] {\n    background: linear-gradient(\n        to right,\n        rgba(52, 199, 89, 0.04),\n        transparent 50%\n    );\n}",
+      "timestamp": "2025-12-27T23:41:15.181Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 241,
+      "line_number_end": 248,
+      "code": "\n.segment-card.expanded[data-complexity=\"medium\"] {\n    background: linear-gradient(\n        to right,\n        rgba(255, 159, 10, 0.04),\n        transparent 50%\n    );\n}",
+      "timestamp": "2025-12-27T23:41:15.181Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 249,
+      "line_number_end": 256,
+      "code": "\n.segment-card.expanded[data-complexity=\"high\"] {\n    background: linear-gradient(\n        to right,\n        rgba(255, 69, 58, 0.04),\n        transparent 50%\n    );\n}",
+      "timestamp": "2025-12-27T23:41:15.181Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 6,
+      "line_number_start": 257,
+      "line_number_end": 265,
+      "code": "\n.segment-card.expanded[data-complexity=\"unknown\"] {\n    background: linear-gradient(\n        to right,\n        rgba(142, 142, 147, 0.03),\n        transparent 50%\n    );\n}\n",
+      "timestamp": "2025-12-27T23:41:15.181Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-27T23-37-54-372Z",
+    "totalBlocks": 4,
+    "lastUpdated": "2025-12-27T23:41:15.186Z"
+  }
+}

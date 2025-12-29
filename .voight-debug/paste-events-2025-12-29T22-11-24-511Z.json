@@ -1,0 +1,56 @@
+[
+  {
+    "timestamp": "2025-12-29T22:13:08.518Z",
+    "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts",
+    "detected": true,
+    "textLength": 610,
+    "completeText": "     * Sets up shadow state without triggering detection\n     */\n    public initializeDocument(document: vscode.TextDocument): void {\n        const filePath = document.fileName;\n\n        if (!this._shadowDocuments.has(filePath)) {\n            // Initialize shadow state to current document state\n            // This prevents treating existing file content as \"new\" when opened\n            this._updateShadow(document);\n            Logger.debug(`ChangeDetector: Initialized shadow state for ${filePath}`);\n        } else {\n            Logger.debug(`ChangeDetector: File already tracked ${filePath}`);\n        }\n",
+    "rangeStart": {
+      "line": 56,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 75,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1767046388518,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T22:13:22.712Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 711,
+    "completeText": "     * Sets up tracking for the document without triggering detection\n     */\n    public initializeDocument(document: vscode.TextDocument): void {\n        if (document.uri.scheme !== 'file') {\n            return;\n        }\n\n        // Check if file should be excluded\n        if (this._filePatternMatcher.shouldExclude(document.fileName)) {\n            Logger.debug(`DetectionCoordinator: File excluded by pattern: ${document.fileName}`);\n            return;\n        }\n\n        // Initialize shadow state - this does NOT treat existing content as AI-generated\n        this._changeDetector.initializeDocument(document);\n        Logger.info(`DetectionCoordinator: Initialized tracking for ${document.fileName}`);\n",
+    "rangeStart": {
+      "line": 34,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 87,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 14194,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T22:14:37.739Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 51,
+    "completeText": "import { ChangeDetector } from './changeDetector';\n",
+    "rangeStart": {
+      "line": 2,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 3,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 75027,
+    "documentVersion": 3
+  }
+]

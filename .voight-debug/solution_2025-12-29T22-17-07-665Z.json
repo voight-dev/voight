@@ -1,0 +1,33 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 406,
+      "line_number_end": 406,
+      "code": "        let shouldShowFileList = false;",
+      "timestamp": "2025-12-29T22:23:03.950Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 418,
+      "line_number_end": 430,
+      "code": "                // Active file has no segments\n                if (blocks.length > 0) {\n                    // There are segments in other files - show file list overview\n                    shouldShowFileList = true;\n                    Logger.debug(`[SegmentsWebviewProvider] Active file has no segments, showing file list overview`);\n                } else {\n                    // No segments anywhere\n                    fileToShow = undefined;\n                    Logger.debug(`[SegmentsWebviewProvider] Active file has no segments and no segments exist`);\n                }\n            }\n        } else {\n            // No active file, keep showing last viewed file if it exists",
+      "timestamp": "2025-12-29T22:23:03.950Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 435,
+      "line_number_end": 442,
+      "code": "        // If we should show file list, do it now\n        if (shouldShowFileList) {\n            this._showFileList(blocks);\n            return;\n        }\n\n        // If we don't have a file to show yet, initialize it to the first file with segments\n        if (!fileToShow && blocks.length > 0 && !shouldShowFileList) {",
+      "timestamp": "2025-12-29T22:23:21.871Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-29T22-17-07-665Z",
+    "totalBlocks": 3,
+    "lastUpdated": "2025-12-29T22:23:21.871Z"
+  }
+}

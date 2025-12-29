@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"lib": [
+			"ES2022",
+			"DOM"
+		],
+		"module": "ESNext",
+		"target": "ES2022",
+		"moduleResolution": "bundler",
+		"noEmit": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"sourceMap": true
+	},
+	"include": [
+		"**/*.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

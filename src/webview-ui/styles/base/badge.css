@@ -1,0 +1,88 @@
+/**
+ * Badge Component Styles
+ *
+ * Design System:
+ * - Compact, minimal design
+ * - Clear color coding for different states
+ * - VSCode-native color palette
+ * - Subtle styling that doesn't overpower content
+ */
+
+/* Base Badge */
+.vk-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+/* Default Variant */
+.vk-badge--default {
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+}
+
+/* Info Variant (blue) */
+.vk-badge--info {
+    background-color: var(--vscode-charts-blue);
+    color: var(--vscode-editor-background);
+}
+
+/* Success Variant (green) */
+.vk-badge--success {
+    background-color: var(--vscode-charts-green);
+    color: var(--vscode-editor-background);
+}
+
+/* Warning Variant (yellow/orange) */
+.vk-badge--warning {
+    background-color: var(--vscode-charts-orange);
+    color: var(--vscode-editor-background);
+}
+
+/* Error Variant (red) */
+.vk-badge--error {
+    background-color: var(--vscode-charts-red);
+    color: var(--vscode-editor-background);
+}
+
+/* Dark theme adjustments */
+body[data-vscode-theme-kind="vscode-dark"] .vk-badge--info {
+    background-color: rgba(58, 150, 221, 0.9);
+}
+
+body[data-vscode-theme-kind="vscode-dark"] .vk-badge--success {
+    background-color: rgba(73, 190, 141, 0.9);
+}
+
+body[data-vscode-theme-kind="vscode-dark"] .vk-badge--warning {
+    background-color: rgba(218, 146, 74, 0.9);
+}
+
+body[data-vscode-theme-kind="vscode-dark"] .vk-badge--error {
+    background-color: rgba(237, 106, 94, 0.9);
+}
+
+/* Light theme adjustments */
+body[data-vscode-theme-kind="vscode-light"] .vk-badge--info {
+    background-color: rgba(58, 150, 221, 1);
+}
+
+body[data-vscode-theme-kind="vscode-light"] .vk-badge--success {
+    background-color: rgba(73, 190, 141, 1);
+}
+
+body[data-vscode-theme-kind="vscode-light"] .vk-badge--warning {
+    background-color: rgba(218, 146, 74, 1);
+}
+
+body[data-vscode-theme-kind="vscode-light"] .vk-badge--error {
+    background-color: rgba(237, 106, 94, 1);
+}

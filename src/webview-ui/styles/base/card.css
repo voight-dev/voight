@@ -1,0 +1,127 @@
+/**
+ * Card Component Styles
+ *
+ * Design System:
+ * - Uses VSCode native color variables
+ * - Subtle borders and shadows
+ * - Consistent spacing scale
+ * - Smooth transitions
+ */
+
+/* Base Card */
+.vk-card {
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    margin-bottom: 8px;
+}
+
+/* Padding Variants */
+.vk-card--padding-none {
+    padding: 0;
+}
+
+.vk-card--padding-small {
+    padding: 8px;
+}
+
+.vk-card--padding-medium {
+    padding: 12px;
+}
+
+.vk-card--padding-large {
+    padding: 16px;
+}
+
+/* Interactive Card (hoverable/clickable) */
+.vk-card--interactive {
+    cursor: pointer;
+}
+
+.vk-card--interactive:hover {
+    background-color: var(--vscode-list-hoverBackground);
+    border-color: var(--vscode-focusBorder);
+}
+
+.vk-card--interactive:active {
+    transform: translateY(1px);
+}
+
+/* Card Header */
+.vk-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    margin-bottom: 12px;
+}
+
+.vk-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    line-height: 1.4;
+    flex: 1;
+}
+
+.vk-card-subtitle {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    line-height: 1.4;
+    margin-top: 2px;
+}
+
+.vk-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Card Body */
+.vk-card-body {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--vscode-foreground);
+}
+
+/* Card Footer */
+.vk-card-footer {
+    padding-top: 8px;
+    margin-top: 12px;
+    border-top: 1px solid var(--vscode-panel-border);
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+}
+
+/* Card states */
+.vk-card--selected {
+    border-color: var(--vscode-focusBorder);
+    background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.vk-card--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Dark theme adjustments */
+body[data-vscode-theme-kind="vscode-dark"] .vk-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body[data-vscode-theme-kind="vscode-dark"] .vk-card--interactive:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Light theme adjustments */
+body[data-vscode-theme-kind="vscode-light"] .vk-card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+body[data-vscode-theme-kind="vscode-light"] .vk-card--interactive:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,225 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 333,
+      "line_number_end": 340,
+      "code": "        blocks.forEach(block => {\n            if (!fileMap.has(block.filePath)) {\n                fileMap.set(block.filePath, { count: 0, blocks: [] });\n            }\n            const entry = fileMap.get(block.filePath)!;\n            entry.count++;\n            entry.blocks.push(block);\n        });",
+      "timestamp": "2025-12-27T22:57:14.340Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 333,
+      "line_number_end": 340,
+      "code": "        blocks.forEach(block => {\n            if (!fileMap.has(block.filePath)) {\n                fileMap.set(block.filePath, { count: 0, blocks: [] });\n            }\n            const entry = fileMap.get(block.filePath)!;\n            entry.count++;\n            entry.blocks.push(block);\n        });",
+      "timestamp": "2025-12-27T22:57:14.340Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 365,
+      "line_number_end": 367,
+      "code": "            segments,\n            files: allFiles,\n            currentFile: activeFilePath",
+      "timestamp": "2025-12-27T22:57:14.340Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 3,
+      "line_number_start": 584,
+      "line_number_end": 588,
+      "code": "            <div class=\"file-selector-container\" id=\"file-selector-container\" style=\"display: none;\">\n                <select id=\"file-selector\" class=\"file-selector\">\n                    <option value=\"\">Select a file...</option>\n                </select>\n            </div>",
+      "timestamp": "2025-12-27T22:57:34.114Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 9,
+      "line_number_end": 10,
+      "code": "    let allFiles = []; // All files with segments\n    let currentFile = null; // Currently active file",
+      "timestamp": "2025-12-27T22:57:54.810Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 6,
+      "line_number_start": 19,
+      "line_number_end": 20,
+      "code": "                allFiles = message.files || [];\n                currentFile = message.currentFile || null;",
+      "timestamp": "2025-12-27T22:57:54.810Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 8,
+      "line_number_start": 22,
+      "line_number_end": 22,
+      "code": "                updateFileSelector();",
+      "timestamp": "2025-12-27T22:57:54.810Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 7,
+      "line_number_start": 285,
+      "line_number_end": 290,
+      "code": "            selector.innerHTML = allFiles.map(file => {\n                const selected = file.isActive ? 'selected' : '';\n                return `<option value=\"${escapeHtml(file.filePath)}\" ${selected}>\n                    ${escapeHtml(file.fileName)} (${file.segmentCount})\n                </option>`;\n            }).join('');",
+      "timestamp": "2025-12-27T22:58:13.878Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 9,
+      "line_number_start": 285,
+      "line_number_end": 290,
+      "code": "            selector.innerHTML = allFiles.map(file => {\n                const selected = file.isActive ? 'selected' : '';\n                return `<option value=\"${escapeHtml(file.filePath)}\" ${selected}>\n                    ${escapeHtml(file.fileName)} (${file.segmentCount})\n                </option>`;\n            }).join('');",
+      "timestamp": "2025-12-27T22:58:13.878Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 11,
+      "line_number_start": 266,
+      "line_number_end": 307,
+      "code": "    function updateFileSelector() {\n        const selectorContainer = document.getElementById('file-selector-container');\n        const selector = document.getElementById('file-selector');\n\n        if (!allFiles || allFiles.length === 0) {\n            // No files with segments - hide selector\n            if (selectorContainer) {\n                selectorContainer.style.display = 'none';\n            }\n            return;\n        }\n\n        // Show selector when there are files\n        if (selectorContainer) {\n            selectorContainer.style.display = 'block';\n        }\n\n        // Populate selector with files\n        if (selector) {\n            selector.innerHTML = allFiles.map(file => {\n                const selected = file.isActive ? 'selected' : '';\n                return `<option value=\"${escapeHtml(file.filePath)}\" ${selected}>\n                    ${escapeHtml(file.fileName)} (${file.segmentCount})\n                </option>`;\n            }).join('');\n\n            // Remove existing listener if any\n            const newSelector = selector.cloneNode(true);\n            selector.parentNode.replaceChild(newSelector, selector);\n\n            // Add change listener\n            newSelector.addEventListener('change', (e) => {\n                const selectedPath = e.target.value;\n                if (selectedPath) {\n                    vscode.postMessage({\n                        command: 'openFile',\n                        filePath: selectedPath\n                    });\n                }\n            });\n        }\n    }",
+      "timestamp": "2025-12-27T22:58:13.878Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 13,
+      "line_number_start": 296,
+      "line_number_end": 308,
+      "code": "            // Add change listener\n            newSelector.addEventListener('change', (e) => {\n                const selectedPath = e.target.value;\n                if (selectedPath) {\n                    vscode.postMessage({\n                        command: 'openFile',\n                        filePath: selectedPath\n                    });\n                }\n            });\n        }\n    }\n",
+      "timestamp": "2025-12-27T22:58:13.878Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    },
+    {
+      "block_no": 11,
+      "line_number_start": 100,
+      "line_number_end": 101,
+      "code": "/* File Selector */\n.file-selector-container {",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 13,
+      "line_number_start": 102,
+      "line_number_end": 103,
+      "code": "    margin-top: var(--space-lg);\n    margin-bottom: var(--space-md);",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 15,
+      "line_number_start": 104,
+      "line_number_end": 105,
+      "code": "}\n",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 17,
+      "line_number_start": 106,
+      "line_number_end": 107,
+      "code": ".file-selector {\n    width: 100%;",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 19,
+      "line_number_start": 108,
+      "line_number_end": 109,
+      "code": "    padding: var(--space-md) var(--space-lg);\n    background: var(--vscode-input-background);",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 21,
+      "line_number_start": 110,
+      "line_number_end": 111,
+      "code": "    color: var(--vscode-input-foreground);\n    border: 1px solid var(--vscode-input-border);",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 23,
+      "line_number_start": 112,
+      "line_number_end": 113,
+      "code": "    border-radius: var(--radius-md);\n    font-size: var(--font-size-sm);",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 25,
+      "line_number_start": 114,
+      "line_number_end": 115,
+      "code": "    font-family: inherit;\n    cursor: pointer;",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 27,
+      "line_number_start": 116,
+      "line_number_end": 117,
+      "code": "    outline: none;\n    transition: all var(--transition-fast);",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 29,
+      "line_number_start": 118,
+      "line_number_end": 119,
+      "code": "}\n",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 31,
+      "line_number_start": 120,
+      "line_number_end": 121,
+      "code": ".file-selector:hover {\n    border-color: var(--vscode-focusBorder);",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 33,
+      "line_number_start": 122,
+      "line_number_end": 123,
+      "code": "}\n",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 35,
+      "line_number_start": 124,
+      "line_number_end": 125,
+      "code": ".file-selector:focus {\n    border-color: var(--vscode-focusBorder);",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 37,
+      "line_number_start": 126,
+      "line_number_end": 127,
+      "code": "    box-shadow: 0 0 0 1px var(--vscode-focusBorder);\n}",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 39,
+      "line_number_start": 128,
+      "line_number_end": 129,
+      "code": "\n.file-selector option {",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    },
+    {
+      "block_no": 41,
+      "line_number_start": 130,
+      "line_number_end": 134,
+      "code": "    background: var(--vscode-dropdown-background);\n    color: var(--vscode-dropdown-foreground);\n    padding: var(--space-md);\n}\n",
+      "timestamp": "2025-12-27T22:58:40.048Z",
+      "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-27T22-53-15-658Z",
+    "totalBlocks": 27,
+    "lastUpdated": "2025-12-27T22:58:40.052Z"
+  }
+}

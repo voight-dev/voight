@@ -1,0 +1,92 @@
+[
+  {
+    "timestamp": "2025-12-28T20:35:43.372Z",
+    "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts",
+    "detected": true,
+    "textLength": 1003,
+    "completeText": "            // Allow gaps up to 10 lines if they're mostly empty/whitespace\n            if (gap <= 10) {\n                // Always extend for small gaps\n                if (gap <= 3) {\n                    shouldExtend = true;\n                } else {\n                    // For larger gaps (4-10), check if gap is mostly empty\n                    let emptyOrSimpleLines = 0;\n                    for (let gapLine = rangeEnd + 1; gapLine < line; gapLine++) {\n                        const text = document.lineAt(gapLine).text.trim();\n                        if (text === '' || text === '{' || text === '}' ||\n                            text === '};' || text === '});' || text.startsWith('//')) {\n                            emptyOrSimpleLines++;\n                        }\n                    }\n                    // If >70% of gap lines are empty/simple, extend the range\n                    if (emptyOrSimpleLines / (gap - 1) > 0.7) {\n                        shouldExtend = true;\n                    }\n",
+    "rangeStart": {
+      "line": 423,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 436,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766954143372,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T20:45:41.359Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1483,
+    "completeText": "     * Shows count of unseen segments (not interacted with yet)\n     */\n    private _updateBadge() {\n        if (!this._view) {\n            return;\n        }\n\n        const blocks = this._blockManager.getAllBlocks();\n\n        // Count segments that haven't been interacted with yet\n        // A segment is \"seen\" if ANY of these conditions are true:\n        // - Reviewed or dismissed\n        // - Starred\n        // - Has context notes\n        // - Has AI explanation\n        const unseenCount = blocks.filter((block: HighlightSegment) => {\n            // Dismissed or reviewed = seen\n            if (block.state === SegmentState.REVIEWED || block.state === SegmentState.DISMISSED) {\n                return false;\n            }\n\n            // Starred = seen\n            if (block.metadata?.isStarred === true) {\n                return false;\n            }\n\n            // Has context = seen\n            if (block.metadata?.context && block.metadata.context.trim().length > 0) {\n                return false;\n            }\n\n            // Has AI explanation = seen\n            if (block.metadata?.explanation && block.metadata.explanation.trim().length > 0) {\n                return false;\n            }\n\n            // Not interacted with = unseen\n            return true;\n        }).length;\n\n        if (unseenCount > 0) {\n            this._view.badge = {\n                tooltip: `${unseenCount} unseen segment${unseenCount !== 1 ? 's' : ''}`,\n                value: unseenCount\n",
+    "rangeStart": {
+      "line": 214,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 232,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 597987,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T20:48:47.959Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 111,
+    "completeText": "                            // Update badge after star action\n                            this._updateBadge();\n",
+    "rangeStart": {
+      "line": 150,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 150,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 186600,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-28T20:49:15.941Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 115,
+    "completeText": "                            // Update badge after context action\n                            this._updateBadge();\n\n",
+    "rangeStart": {
+      "line": 92,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 92,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 27982,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-28T20:49:44.984Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 83,
+    "completeText": "            // Update badge after AI explanation\n            this._updateBadge();\n\n",
+    "rangeStart": {
+      "line": 562,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 562,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 29043,
+    "documentVersion": 5
+  }
+]

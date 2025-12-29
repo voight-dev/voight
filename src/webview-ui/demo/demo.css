@@ -1,0 +1,97 @@
+/**
+ * Demo Page Styles
+ * Layout and presentation for the component showcase
+ */
+
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.demo-header {
+    padding: 40px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    margin-bottom: 40px;
+}
+
+.demo-header h1 {
+    margin: 0 0 8px 0;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+.demo-header p {
+    margin: 0 0 20px 0;
+    color: var(--vscode-descriptionForeground);
+    font-size: 16px;
+}
+
+.theme-toggle {
+    margin-top: 20px;
+}
+
+.demo-main {
+    padding: 0 20px;
+}
+
+.demo-section {
+    margin-bottom: 60px;
+}
+
+.demo-section h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+.demo-description {
+    margin: 0 0 24px 0;
+    color: var(--vscode-descriptionForeground);
+    font-size: 14px;
+}
+
+/* Grid layout for cards */
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+/* Inline layout for buttons/badges */
+.demo-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .demo-container {
+        padding: 10px;
+    }
+
+    .demo-header {
+        padding: 20px 10px;
+    }
+
+    .demo-main {
+        padding: 0 10px;
+    }
+
+    .demo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .demo-header h1 {
+        font-size: 24px;
+    }
+
+    .demo-section h2 {
+        font-size: 20px;
+    }
+}

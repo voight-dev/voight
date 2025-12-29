@@ -1,0 +1,224 @@
+{
+  "name": "voight",
+  "displayName": "voight",
+  "description": "Ensures human intent drives AI generation, bridging the gap between speed and understanding.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "voight-explorer",
+          "title": "Voight",
+          "icon": "resources/voight-logo-v2-32x32.svg"
+        }
+      ]
+    },
+    "views": {
+      "voight-explorer": [
+        {
+          "type": "webview",
+          "id": "voight.segmentsView",
+          "name": "Segments",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "voight.healthCheck",
+        "title": "Voight: Health Check"
+      },
+      {
+        "command": "voight.showStats",
+        "title": "Voight: Show Paste Detection Stats"
+      },
+      {
+        "command": "voight.showBlockStats",
+        "title": "Voight: Show Block Statistics"
+      },
+      {
+        "command": "voight.clearBlocks",
+        "title": "Voight: Clear All Blocks"
+      },
+      {
+        "command": "voight.showCurrentFileBlocks",
+        "title": "Voight: Show Current File Blocks"
+      },
+      {
+        "command": "voight.showFileContexts",
+        "title": "Voight: Show All Context Notes for File"
+      },
+      {
+        "command": "voight.getTopEditedFiles",
+        "title": "Voight: Show Top Edited Files"
+      },
+      {
+        "command": "voight.showFileTrackingStats",
+        "title": "Voight: Show File Tracking Statistics"
+      },
+      {
+        "command": "voight.exportFileRankings",
+        "title": "Voight: Export File Rankings"
+      },
+      {
+        "command": "voight.getCurrentFileTracking",
+        "title": "Voight: Show Current File Tracking"
+      },
+      {
+        "command": "voight.clearFileTracking",
+        "title": "Voight: Clear File Tracking Data"
+      }
+    ],
+    "configuration": {
+      "title": "Voight",
+      "properties": {
+        "voight.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show AI-assisted code percentage in status bar"
+        },
+        "voight.hover.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show contextual information when hovering over AI-assisted code"
+        },
+        "voight.gutterIcons.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show gutter icons next to AI-assisted code (can be visually distracting)"
+        },
+        "voight.detection.minCharacters": {
+          "type": "number",
+          "default": 50,
+          "description": "Minimum characters for large insertion detection",
+          "minimum": 10
+        },
+        "voight.detection.minLines": {
+          "type": "number",
+          "default": 2,
+          "description": "Minimum lines for multi-line paste detection",
+          "minimum": 1
+        },
+        "voight.detection.semanticExpansion": {
+          "type": "string",
+          "enum": [
+            "none",
+            "minimal",
+            "balanced",
+            "maximum"
+          ],
+          "default": "none",
+          "description": "Control how much context to include around detected changes",
+          "enumDescriptions": [
+            "No expansion - highlight only exact changed lines",
+            "Minimal expansion - up to 5 lines of context",
+            "Balanced expansion - up to 15 lines of context (default)",
+            "Maximum expansion - up to 30 lines of context for full semantic blocks"
+          ]
+        },
+        "voight.highlighting.showContextBorder": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show different border style for expanded context vs actual changes"
+        },
+        "voight.debug.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable debug mode with verbose logging and JSON output files"
+        },
+        "voight.detection.excludePatterns": {
+          "type": "array",
+          "default": [
+            "**/*.min.js",
+            "**/*.min.css",
+            "**/dist/**",
+            "**/build/**",
+            "**/node_modules/**",
+            "**/.git/**"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "File patterns to exclude from detection (supports glob patterns like **/*.css or **/test/**). Use ! prefix for regex (e.g., !/test\\d+\\.js$/)"
+        },
+        "voight.ai.provider": {
+          "type": "string",
+          "enum": [
+            "gemini",
+            "anthropic",
+            "openai"
+          ],
+          "default": "gemini",
+          "description": "AI provider for code explanation",
+          "enumDescriptions": [
+            "Google Gemini (gemini-1.5-pro)",
+            "Anthropic Claude (claude-3-5-sonnet-20241022)",
+            "OpenAI GPT (gpt-4-turbo-preview)"
+          ]
+        },
+        "voight.ai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for AI provider (Gemini, Anthropic, or OpenAI)"
+        },
+        "voight.ai.model": {
+          "type": "string",
+          "default": "",
+          "description": "Model to use (optional, defaults to provider's default: gemini-1.5-pro, claude-3-5-sonnet-20241022, or gpt-4-turbo-preview)"
+        },
+        "voight.ai.maxTokens": {
+          "type": "number",
+          "default": 2048,
+          "description": "Maximum tokens for AI response",
+          "minimum": 256,
+          "maximum": 8192
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "pnpm run check-types && pnpm run lint && pnpm run build:extension",
+    "build:extension": "node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "pnpm run check-types && pnpm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "dev-install": "./scripts/dev-install.sh"
+  },
+  "devDependencies": {
+    "@types/diff": "^8.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.106.1",
+    "@vscode-elements/elements": "^2.3.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.27.0",
+    "eslint": "^9.39.1",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@google/generative-ai": "^0.21.0",
+    "diff": "^8.0.2",
+    "openai": "^4.68.0"
+  }
+}

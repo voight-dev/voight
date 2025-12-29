@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2025-12-29T22:26:00.296Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1521,
+    "completeText": "\n        if (activeFilePath) {\n            // Check if active file has any segments\n            const activeFileHasSegments = blocks.some(block => block.filePath === activeFilePath);\n\n            if (activeFileHasSegments) {\n                // Active file has segments, switch to it\n                fileToShow = activeFilePath;\n                this._lastViewedFilePath = activeFilePath;\n                Logger.debug(`[SegmentsWebviewProvider] Active file has segments, switching to it`);\n            } else {\n                // Active file has no segments - keep showing last viewed file\n                // This prevents jarring view switches when navigating through files\n                if (this._lastViewedFilePath && blocks.some(b => b.filePath === this._lastViewedFilePath)) {\n                    fileToShow = this._lastViewedFilePath;\n                    Logger.debug(`[SegmentsWebviewProvider] Active file has no segments, keeping last viewed file`);\n                } else {\n                    // No last viewed file or it no longer has segments, default to first file with segments\n                    fileToShow = undefined;\n                    Logger.debug(`[SegmentsWebviewProvider] Active file has no segments and no last viewed file`);\n                }\n            }\n        } else {\n            // No active file, keep showing last viewed file if it exists\n            fileToShow = this._lastViewedFilePath;\n            Logger.debug(`[SegmentsWebviewProvider] No active file, keeping last viewed file`);\n",
+    "rangeStart": {
+      "line": 406,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 439,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1767047160296,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-29T22:28:11.540Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 48,
+    "completeText": "        if (!fileToShow && blocks.length > 0) {\n",
+    "rangeStart": {
+      "line": 435,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 436,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 131244,
+    "documentVersion": 3
+  }
+]

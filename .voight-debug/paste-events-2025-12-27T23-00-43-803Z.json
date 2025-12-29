@@ -1,0 +1,56 @@
+[
+  {
+    "timestamp": "2025-12-27T23:01:07.452Z",
+    "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 100,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 101,
+      "char": 26
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766876467452,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T23:01:10.125Z",
+    "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css",
+    "detected": true,
+    "textLength": 46,
+    "completeText": "/* File Selector */\n.file-selector-container {",
+    "rangeStart": {
+      "line": 100,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 100,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 2673,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-27T23:08:27.543Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 1572,
+    "completeText": "        // Build file list items\n        const fileItems = files.map((file, index) => {\n            const itemDiv = document.createElement('div');\n            itemDiv.className = 'file-list-item';\n            itemDiv.dataset.fileIndex = index;\n\n            itemDiv.innerHTML = `\n                <div class=\"file-list-item-icon\">\n                    <span class=\"codicon codicon-file-code\"></span>\n                </div>\n                <div class=\"file-list-item-content\">\n                    <div class=\"file-list-item-title\">${escapeHtml(file.fileName)}</div>\n                    <div class=\"file-list-item-subtitle\">${file.segmentCount} segment${file.segmentCount !== 1 ? 's' : ''}</div>\n                </div>\n                <div class=\"file-list-item-action\">\n                    <span class=\"codicon codicon-chevron-right\"></span>\n                </div>\n            `;\n\n            // Add click handler directly to element\n            itemDiv.addEventListener('click', () => {\n                vscode.postMessage({\n                    command: 'openFile',\n                    filePath: file.filePath\n                });\n            });\n\n            return itemDiv;\n        });\n\n        // Clear and rebuild container\n        container.innerHTML = `\n            <div class=\"file-list-header\">\n                <div class=\"codicon codicon-info\"></div>\n                <p>No segments in current file. Click a file below to view its segments:</p>\n            </div>\n        `;\n\n        // Append file items\n        fileItems.forEach(item => container.appendChild(item));\n",
+    "rangeStart": {
+      "line": 233,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 264,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 437418,
+    "documentVersion": 2
+  }
+]

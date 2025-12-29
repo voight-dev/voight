@@ -1,0 +1,326 @@
+[
+  {
+    "timestamp": "2025-12-28T00:35:29.536Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 296,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 308,
+      "char": 55
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766882129536,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T00:35:31.783Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 367,
+    "completeText": "                selectorContainer.style.display = 'none';\n            }\n            return;\n        }\n\n        // Show selector when there are files\n        if (selectorContainer) {\n            selectorContainer.style.display = 'block';\n        }\n\n        // Populate selector with files\n        if (selector) {\n            selector.innerHTML = allFiles.map(file => {",
+    "rangeStart": {
+      "line": 296,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 296,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 2247,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-28T11:53:09.118Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": " ",
+    "rangeStart": {
+      "line": 224,
+      "char": 36
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 36
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 40657335,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T11:53:09.695Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "|",
+    "rangeStart": {
+      "line": 224,
+      "char": 37
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 37
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 577,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-28T11:53:09.860Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "|",
+    "rangeStart": {
+      "line": 224,
+      "char": 38
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 38
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 165,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-28T11:53:10.069Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": " ",
+    "rangeStart": {
+      "line": 224,
+      "char": 39
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 39
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 209,
+    "documentVersion": 5
+  },
+  {
+    "timestamp": "2025-12-28T11:53:11.371Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "L",
+    "rangeStart": {
+      "line": 224,
+      "char": 40
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 40
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1302,
+    "documentVersion": 6
+  },
+  {
+    "timestamp": "2025-12-28T11:53:11.577Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "a",
+    "rangeStart": {
+      "line": 224,
+      "char": 41
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 41
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 206,
+    "documentVersion": 7
+  },
+  {
+    "timestamp": "2025-12-28T11:53:13.931Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": true,
+    "textLength": 8,
+    "completeText": "Language",
+    "rangeStart": {
+      "line": 224,
+      "char": 40
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 42
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 2354,
+    "documentVersion": 8
+  },
+  {
+    "timestamp": "2025-12-28T11:53:14.465Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": ".",
+    "rangeStart": {
+      "line": 224,
+      "char": 48
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 48
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 534,
+    "documentVersion": 9
+  },
+  {
+    "timestamp": "2025-12-28T11:53:15.707Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "J",
+    "rangeStart": {
+      "line": 224,
+      "char": 49
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 49
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1242,
+    "documentVersion": 10
+  },
+  {
+    "timestamp": "2025-12-28T11:53:16.027Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "a",
+    "rangeStart": {
+      "line": 224,
+      "char": 50
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 50
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 320,
+    "documentVersion": 11
+  },
+  {
+    "timestamp": "2025-12-28T11:53:16.665Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "v",
+    "rangeStart": {
+      "line": 224,
+      "char": 51
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 51
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 638,
+    "documentVersion": 12
+  },
+  {
+    "timestamp": "2025-12-28T11:53:16.839Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 1,
+    "completeText": "a",
+    "rangeStart": {
+      "line": 224,
+      "char": 52
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 52
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 174,
+    "documentVersion": 13
+  },
+  {
+    "timestamp": "2025-12-28T11:53:17.757Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": true,
+    "textLength": 60,
+    "completeText": "            case Language.TypeScript || Language.JavaScript:",
+    "rangeStart": {
+      "line": 224,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 224,
+      "char": 54
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 918,
+    "documentVersion": 14
+  },
+  {
+    "timestamp": "2025-12-28T11:53:21.359Z",
+    "file": "/Users/swarit-dev/voight/src/detection/complexity/analyzer.ts",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 225,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 226,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 3602,
+    "documentVersion": 15
+  },
+  {
+    "timestamp": "2025-12-28T20:25:36.595Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 687,
+    "completeText": "     * Shows count of unreviewed segments (not dismissed/reviewed)\n     */\n    private _updateBadge() {\n        if (!this._view) {\n            return;\n        }\n\n        const blocks = this._blockManager.getAllBlocks();\n\n        // Count segments that are NOT reviewed or dismissed\n        const unreviewedCount = blocks.filter((block: HighlightSegment) => {\n            return block.state !== SegmentState.REVIEWED && block.state !== SegmentState.DISMISSED;\n        }).length;\n\n        if (unreviewedCount > 0) {\n            this._view.badge = {\n                tooltip: `${unreviewedCount} unreviewed segment${unreviewedCount !== 1 ? 's' : ''}`,\n                value: unreviewedCount\n",
+    "rangeStart": {
+      "line": 212,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 242,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 30735236,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T20:25:54.153Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 114,
+    "completeText": "                        // Update badge in real-time after dismissal\n                        this._updateBadge();\n",
+    "rangeStart": {
+      "line": 128,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 128,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 17558,
+    "documentVersion": 3
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2025-12-27T22:37:32.793Z",
+    "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css",
+    "detected": true,
+    "textLength": 67,
+    "completeText": "    max-height: 400px;\n    overflow-x: auto;\n    overflow-y: auto;\n",
+    "rangeStart": {
+      "line": 742,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 743,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766875052793,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T22:39:44.893Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1890,
+    "completeText": "        Logger.debug(`[SegmentsWebviewProvider] Active file: ${activeFilePath}`);\n        Logger.debug(`[SegmentsWebviewProvider] Total blocks: ${blocks.length}`);\n\n        // Log all block file paths for debugging\n        blocks.forEach(b => {\n            Logger.debug(`  Block ${b.id}: ${b.filePath} (lines ${b.startLine}-${b.endLine})`);\n        });\n\n        // Filter: Only show segments that are:\n        // 1. From the currently active file, AND\n        // 2. Either newly detected (< 5 min old), OR have star or context\n        const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);\n\n        const filteredBlocks = blocks.filter((block: HighlightSegment) => {\n            // First check: Must be from the active file\n            if (block.filePath !== activeFilePath) {\n                Logger.debug(`  Block ${block.id} filtered out: file path mismatch`);\n                return false;\n            }\n\n            const hasContext = block.metadata?.context && block.metadata.context.trim().length > 0;\n            const isStarred = block.metadata?.isStarred === true;\n\n            // Always show if starred or has context\n            if (hasContext || isStarred) {\n                Logger.debug(`  Block ${block.id} included: starred=${isStarred}, hasContext=${hasContext}`);\n                return true;\n            }\n\n            // Show if newly detected (within last 5 minutes)\n            if (block.metadata?.detectedAt) {\n                const detectedTime = new Date(block.metadata.detectedAt).getTime();\n                const isNew = detectedTime > fiveMinutesAgo;\n                Logger.debug(`  Block ${block.id} detectedAt=${block.metadata.detectedAt}, isNew=${isNew}`);\n                return isNew;\n            }\n\n            // Default: show (for segments without detectedAt metadata)\n            Logger.debug(`  Block ${block.id} included: no detectedAt (default show)`);\n",
+    "rangeStart": {
+      "line": 247,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 274,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 132100,
+    "documentVersion": 138
+  }
+]

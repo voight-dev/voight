@@ -1,0 +1,92 @@
+[
+  {
+    "timestamp": "2025-12-27T22:57:14.338Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1541,
+    "completeText": "        // Build file list for selector - group all blocks by file\n        const fileMap = new Map<string, { count: number; blocks: HighlightSegment[] }>();\n        blocks.forEach(block => {\n            if (!fileMap.has(block.filePath)) {\n                fileMap.set(block.filePath, { count: 0, blocks: [] });\n            }\n            const entry = fileMap.get(block.filePath)!;\n            entry.count++;\n            entry.blocks.push(block);\n        });\n\n        const allFiles = Array.from(fileMap.entries()).map(([filePath, data]) => ({\n            filePath,\n            fileName: this._getFileName(filePath),\n            segmentCount: data.count,\n            isActive: filePath === activeFilePath\n        }));\n\n        // Transform blocks into segment data for the webview\n        const segments = filteredBlocks.map((block: HighlightSegment) => ({\n            id: block.id,\n            name: this._getSegmentName(block),\n            lineRange: `Lines ${block.startLine + 1}-${block.endLine + 1}`, // Add line range as subtitle\n            fileName: this._getFileName(block.filePath),\n            filePath: block.filePath,\n            startLine: block.startLine + 1, // Convert to 1-based\n            endLine: block.endLine + 1,\n            complexity: this._getComplexity(block),\n            state: block.state,\n            metadata: block.metadata\n        }));\n\n        this._view.webview.postMessage({\n            command: 'updateSegments',\n            segments,\n            files: allFiles,\n            currentFile: activeFilePath\n",
+    "rangeStart": {
+      "line": 331,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 348,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766876234338,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T22:57:34.113Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 276,
+    "completeText": "            <div class=\"file-selector-container\" id=\"file-selector-container\" style=\"display: none;\">\n                <select id=\"file-selector\" class=\"file-selector\">\n                    <option value=\"\">Select a file...</option>\n                </select>\n            </div>\n",
+    "rangeStart": {
+      "line": 584,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 584,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 19775,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-27T22:57:54.810Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 527,
+    "completeText": "    let allFiles = []; // All files with segments\n    let currentFile = null; // Currently active file\n\n    // Listen for messages from extension\n    window.addEventListener('message', event => {\n        const message = event.data;\n\n        switch (message.command) {\n            case 'updateSegments':\n                segments = message.segments;\n                allFiles = message.files || [];\n                currentFile = message.currentFile || null;\n                renderSegments();\n                updateFileSelector();\n",
+    "rangeStart": {
+      "line": 9,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 18,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 20697,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T22:58:13.876Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 1540,
+    "completeText": "    function updateFileSelector() {\n        const selectorContainer = document.getElementById('file-selector-container');\n        const selector = document.getElementById('file-selector');\n\n        if (!allFiles || allFiles.length === 0) {\n            // No files with segments - hide selector\n            if (selectorContainer) {\n                selectorContainer.style.display = 'none';\n            }\n            return;\n        }\n\n        // Show selector when there are files\n        if (selectorContainer) {\n            selectorContainer.style.display = 'block';\n        }\n\n        // Populate selector with files\n        if (selector) {\n            selector.innerHTML = allFiles.map(file => {\n                const selected = file.isActive ? 'selected' : '';\n                return `<option value=\"${escapeHtml(file.filePath)}\" ${selected}>\n                    ${escapeHtml(file.fileName)} (${file.segmentCount})\n                </option>`;\n            }).join('');\n\n            // Remove existing listener if any\n            const newSelector = selector.cloneNode(true);\n            selector.parentNode.replaceChild(newSelector, selector);\n\n            // Add change listener\n            newSelector.addEventListener('change', (e) => {\n                const selectedPath = e.target.value;\n                if (selectedPath) {\n                    vscode.postMessage({\n                        command: 'openFile',\n                        filePath: selectedPath\n                    });\n                }\n            });\n        }\n    }\n\n",
+    "rangeStart": {
+      "line": 266,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 266,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 19066,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-27T22:58:40.047Z",
+    "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css",
+    "detected": true,
+    "textLength": 875,
+    "completeText": "/* File Selector */\n.file-selector-container {\n    margin-top: var(--space-lg);\n    margin-bottom: var(--space-md);\n}\n\n.file-selector {\n    width: 100%;\n    padding: var(--space-md) var(--space-lg);\n    background: var(--vscode-input-background);\n    color: var(--vscode-input-foreground);\n    border: 1px solid var(--vscode-input-border);\n    border-radius: var(--radius-md);\n    font-size: var(--font-size-sm);\n    font-family: inherit;\n    cursor: pointer;\n    outline: none;\n    transition: all var(--transition-fast);\n}\n\n.file-selector:hover {\n    border-color: var(--vscode-focusBorder);\n}\n\n.file-selector:focus {\n    border-color: var(--vscode-focusBorder);\n    box-shadow: 0 0 0 1px var(--vscode-focusBorder);\n}\n\n.file-selector option {\n    background: var(--vscode-dropdown-background);\n    color: var(--vscode-dropdown-foreground);\n    padding: var(--space-md);\n}\n\n",
+    "rangeStart": {
+      "line": 100,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 100,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 26171,
+    "documentVersion": 2
+  }
+]

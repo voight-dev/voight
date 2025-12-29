@@ -1,0 +1,78 @@
+/**
+ * Collapse Component Styles
+ *
+ * Design System:
+ * - GitLens-inspired collapsible sections
+ * - Smooth animations
+ * - Clear visual hierarchy
+ * - Keyboard accessible
+ */
+
+/* Base Collapse */
+.vk-collapse {
+    margin-bottom: 8px;
+}
+
+/* Header (clickable) */
+.vk-collapse-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background-color: var(--vscode-sideBar-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.vk-collapse-header:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.vk-collapse-header:focus-visible {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: -1px;
+}
+
+.vk-collapse-header:active {
+    background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+/* Chevron Icon */
+.vk-collapse-chevron {
+    font-size: 16px;
+    color: var(--vscode-foreground);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+/* Title */
+.vk-collapse-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    line-height: 1.4;
+    flex: 1;
+}
+
+/* Content Wrapper (for animation) */
+.vk-collapse-content-wrapper {
+    overflow: hidden;
+}
+
+/* Content */
+.vk-collapse-content {
+    padding: 12px 8px;
+    border: 1px solid var(--vscode-panel-border);
+    border-top: none;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    background-color: var(--vscode-editor-background);
+}
+
+/* Collapsed State */
+.vk-collapse--collapsed .vk-collapse-header {
+    border-radius: 3px;
+}

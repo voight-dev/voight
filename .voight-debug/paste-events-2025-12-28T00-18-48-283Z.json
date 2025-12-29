@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2025-12-28T00:31:04.743Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 1907,
+    "completeText": "        // Find the current segment index\n        const currentIndex = segments.findIndex(s => s.id === segmentId);\n\n        // Find the card element\n        const card = document.querySelector(`.segment-card[data-segment-id=\"${segmentId}\"]`);\n        if (!card) return;\n\n        // Add dismissing class to trigger animation\n        card.classList.add('dismissing');\n\n        // Wait for animation to complete before removing from DOM and notifying backend\n        setTimeout(() => {\n            // Remove from DOM\n            card.remove();\n\n            // Remove from local state\n            segments = segments.filter(s => s.id !== segmentId);\n\n            // Update segment count\n            const countEl = document.getElementById('segment-count');\n            if (countEl) {\n                countEl.textContent = segments.length === 0\n                    ? 'No segments'\n                    : `${segments.length} segment${segments.length !== 1 ? 's' : ''}`;\n            }\n\n            // Notify backend\n            vscode.postMessage({\n                command: 'dismissSegment',\n                segmentId\n            });\n\n            // Auto-advance: Navigate to next segment\n            if (segments.length > 0) {\n                // Get the next segment (or first if we dismissed the last one)\n                const nextIndex = currentIndex >= segments.length ? 0 : currentIndex;\n                const nextSegment = segments[nextIndex];\n\n                if (nextSegment) {\n                    // Tell backend to navigate to this segment\n                    vscode.postMessage({\n                        command: 'goToSegment',\n                        segmentId: nextSegment.id,\n                        startLine: nextSegment.startLine,\n                        endLine: nextSegment.endLine,\n                        filePath: nextSegment.filePath\n                    });\n                }\n            }\n",
+    "rangeStart": {
+      "line": 386,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 414,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766881864743,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T00:31:32.303Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1163,
+    "completeText": "\n                case 'goToSegment':\n                    if (message.filePath && message.startLine !== undefined && message.endLine !== undefined) {\n                        Logger.debug(`[SegmentsWebviewProvider] Navigating to segment: ${message.filePath}:${message.startLine}-${message.endLine}`);\n                        const uri = vscode.Uri.file(message.filePath);\n                        const document = await vscode.workspace.openTextDocument(uri);\n                        const editor = await vscode.window.showTextDocument(document);\n\n                        // Create range for the segment (convert from 1-based to 0-based)\n                        const startLine = message.startLine - 1;\n                        const endLine = message.endLine - 1;\n                        const range = new vscode.Range(startLine, 0, endLine, 999);\n\n                        // Set selection and reveal with InCenter for perfect positioning\n                        editor.selection = new vscode.Selection(range.start, range.end);\n                        editor.revealRange(range, vscode.TextEditorRevealType.InCenter);\n                    }\n                    break;\n",
+    "rangeStart": {
+      "line": 165,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 165,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 27560,
+    "documentVersion": 2
+  }
+]

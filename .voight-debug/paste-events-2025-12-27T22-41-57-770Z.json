@@ -1,0 +1,128 @@
+[
+  {
+    "timestamp": "2025-12-27T22:45:29.673Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1303,
+    "completeText": "        // If no segments in current file, show file list instead\n        if (filteredBlocks.length === 0 && blocks.length > 0) {\n            // Group blocks by file and count segments\n            const fileMap = new Map<string, { count: number; blocks: HighlightSegment[] }>();\n\n            blocks.forEach(block => {\n                if (!fileMap.has(block.filePath)) {\n                    fileMap.set(block.filePath, { count: 0, blocks: [] });\n                }\n                const entry = fileMap.get(block.filePath)!;\n                entry.count++;\n                entry.blocks.push(block);\n            });\n\n            // Transform to file list format\n            const fileList = Array.from(fileMap.entries()).map(([filePath, data]) => ({\n                filePath,\n                fileName: this._getFileName(filePath),\n                segmentCount: data.count,\n                // Get preview of first segment name\n                previewName: this._getSegmentName(data.blocks[0])\n            }));\n\n            Logger.debug(`[SegmentsWebviewProvider] No segments in current file, showing ${fileList.length} files with segments`);\n\n            this._view.webview.postMessage({\n                command: 'showFileList',\n                files: fileList\n            });\n            return;\n        }\n\n",
+    "rangeStart": {
+      "line": 291,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 291,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1766875529673,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T22:45:56.068Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 104,
+    "completeText": "            case 'showFileList':\n                renderFileList(message.files);\n                break;\n\n",
+    "rangeStart": {
+      "line": 20,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 20,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 26395,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T22:46:21.964Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 2385,
+    "completeText": "    function renderFileList(files) {\n        const container = document.getElementById('segments-list');\n        const countEl = document.getElementById('segment-count');\n\n        if (!files || files.length === 0) {\n            container.innerHTML = `\n                <div class=\"empty-state\">\n                    <div class=\"codicon codicon-inbox\"></div>\n                    <p>No segments detected yet.</p>\n                    <p style=\"margin-top: 8px; font-size: 12px;\">Segments will appear here as you work.</p>\n                </div>\n            `;\n            countEl.textContent = 'No segments';\n            return;\n        }\n\n        countEl.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} with segments`;\n\n        // Hide sort controls when showing file list\n        const sortControls = document.querySelector('.sort-controls');\n        if (sortControls) {\n            sortControls.style.display = 'none';\n        }\n\n        container.innerHTML = `\n            <div class=\"file-list-header\">\n                <div class=\"codicon codicon-info\"></div>\n                <p>No segments in current file. Click a file below to view its segments:</p>\n            </div>\n            ${files.map(file => `\n                <div class=\"file-list-item\" data-file-path=\"${escapeHtml(file.filePath)}\">\n                    <div class=\"file-list-item-icon\">\n                        <span class=\"codicon codicon-file-code\"></span>\n                    </div>\n                    <div class=\"file-list-item-content\">\n                        <div class=\"file-list-item-title\">${escapeHtml(file.fileName)}</div>\n                        <div class=\"file-list-item-subtitle\">${file.segmentCount} segment${file.segmentCount !== 1 ? 's' : ''}</div>\n                    </div>\n                    <div class=\"file-list-item-action\">\n                        <span class=\"codicon codicon-chevron-right\"></span>\n                    </div>\n                </div>\n            `).join('')}\n        `;\n\n        // Add click handlers for file items\n        container.querySelectorAll('.file-list-item').forEach(item => {\n            item.addEventListener('click', () => {\n                const filePath = item.dataset.filePath;\n                vscode.postMessage({\n                    command: 'openFile',\n                    filePath\n                });\n            });\n        });\n    }\n\n",
+    "rangeStart": {
+      "line": 198,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 198,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 25896,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-27T22:48:35.921Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 213,
+    "completeText": "        // Show sort controls when rendering segments\n        const sortControls = document.querySelector('.sort-controls');\n        if (sortControls) {\n            sortControls.style.display = 'flex';\n        }\n\n",
+    "rangeStart": {
+      "line": 47,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 47,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 133957,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-27T22:48:54.009Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 366,
+    "completeText": "\n                case 'openFile':\n                    if (message.filePath) {\n                        Logger.debug(`[SegmentsWebviewProvider] Opening file: ${message.filePath}`);\n                        const uri = vscode.Uri.file(message.filePath);\n                        await vscode.window.showTextDocument(uri);\n                    }\n                    break;\n",
+    "rangeStart": {
+      "line": 157,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 157,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 18088,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-27T22:49:30.572Z",
+    "file": "/Users/swarit-dev/voight/src/webview-ui/styles/base/segments.css",
+    "detected": true,
+    "textLength": 2314,
+    "completeText": "\n/* File List Styles */\n.file-list-header {\n    display: flex;\n    align-items: flex-start;\n    gap: var(--space-md);\n    padding: var(--space-lg) var(--space-xl);\n    background: var(--vscode-inputValidation-infoBackground);\n    border: 1px solid var(--vscode-inputValidation-infoBorder);\n    border-radius: var(--radius-md);\n    margin-bottom: var(--space-lg);\n}\n\n.file-list-header .codicon {\n    margin-top: 2px;\n    color: var(--vscode-inputValidation-infoForeground);\n    font-size: var(--font-size-base);\n}\n\n.file-list-header p {\n    margin: 0;\n    font-size: var(--font-size-sm);\n    color: var(--vscode-inputValidation-infoForeground);\n    line-height: 1.5;\n}\n\n.file-list-item {\n    display: flex;\n    align-items: center;\n    gap: var(--space-lg);\n    padding: var(--space-lg) var(--space-xl);\n    border: var(--card-border);\n    border-radius: var(--radius-md);\n    margin-bottom: var(--space-md);\n    cursor: pointer;\n    background: var(--vscode-sideBar-background);\n    transition: all var(--transition-fast);\n}\n\n.file-list-item:hover {\n    background: var(--vscode-list-hoverBackground);\n    border-color: var(--vscode-focusBorder);\n}\n\n.file-list-item:active {\n    transform: scale(0.98);\n}\n\n.file-list-item-icon {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    width: 32px;\n    height: 32px;\n    border-radius: var(--radius-md);\n    background: var(--vscode-button-secondaryBackground);\n    color: var(--vscode-button-secondaryForeground);\n    flex-shrink: 0;\n}\n\n.file-list-item-icon .codicon {\n    font-size: 16px;\n}\n\n.file-list-item-content {\n    flex: 1;\n    min-width: 0;\n}\n\n.file-list-item-title {\n    font-size: var(--font-size-base);\n    font-weight: var(--font-weight-medium);\n    color: var(--vscode-foreground);\n    margin-bottom: 2px;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n}\n\n.file-list-item-subtitle {\n    font-size: var(--font-size-xs);\n    color: var(--vscode-descriptionForeground);\n    letter-spacing: var(--letter-spacing-wide);\n    text-transform: uppercase;\n}\n\n.file-list-item-action {\n    display: flex;\n    align-items: center;\n    color: var(--vscode-descriptionForeground);\n    opacity: 0.5;\n    transition: opacity var(--transition-fast);\n}\n\n.file-list-item:hover .file-list-item-action {\n    opacity: 1;\n}\n",
+    "rangeStart": {
+      "line": 1021,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 1021,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 36563,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T22:52:02.719Z",
+    "file": "/Users/swarit-dev/voight/.vscodeignore",
+    "detected": true,
+    "textLength": 157,
+    "completeText": "!src/webview-ui/**\n.gitignore\n.yarnrc\nesbuild.js\nvsc-extension-quickstart.md\n**/tsconfig.json\n**/eslint.config.mjs\n**/*.map\n**/*.ts\n!src/webview-ui/**/*.css\n",
+    "rangeStart": {
+      "line": 5,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 13,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 152147,
+    "documentVersion": 2
+  }
+]

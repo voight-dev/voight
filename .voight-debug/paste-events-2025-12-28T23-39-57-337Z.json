@@ -1,0 +1,56 @@
+[
+  {
+    "timestamp": "2025-12-28T23:42:37.014Z",
+    "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts",
+    "detected": true,
+    "textLength": 762,
+    "completeText": "     * Returns true if this is a new file with content (should trigger detection)\n     */\n    public initializeDocument(document: vscode.TextDocument): boolean {\n        const filePath = document.fileName;\n\n        if (!this._shadowDocuments.has(filePath)) {\n            // Check if this is a new file with content\n            const hasContent = document.lineCount > 1 || (document.lineCount === 1 && document.lineAt(0).text.trim().length > 0);\n\n            this._updateShadow(document);\n            Logger.debug(`ChangeDetector: Initialized shadow state for ${filePath} (hasContent: ${hasContent})`);\n\n            return hasContent; // Return true if we should detect this as new content\n        }\n\n        return false; // Already tracked, no detection needed\n",
+    "rangeStart": {
+      "line": 56,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 64,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 1766965357014,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T23:42:51.409Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 1654,
+    "completeText": "     * If this is a new file with content, detect it as a segment\n     */\n    public initializeDocument(document: vscode.TextDocument): void {\n        if (document.uri.scheme !== 'file') {\n            return;\n        }\n\n        const isNewFileWithContent = this._changeDetector.initializeDocument(document);\n        Logger.info(`DetectionCoordinator: Initialized ${document.fileName} (new with content: ${isNewFileWithContent})`);\n\n        // If this is a new file with content, treat entire file as a new segment\n        if (isNewFileWithContent) {\n            Logger.info(`DetectionCoordinator: Detecting new file content for ${document.fileName}`);\n\n            // Detect the entire file as changed\n            const blocks = this._changeDetector.detectChanges(document);\n\n            if (blocks.length > 0) {\n                Logger.info(`DetectionCoordinator: Detected ${blocks.length} blocks in new file`);\n\n                // Register blocks\n                blocks.forEach(block => {\n                    const highlightSegment = this._blockManager.registerBlock(\n                        document.fileName,\n                        block.startLine,\n                        block.endLine,\n                        block.code,\n                        block.timestamp,\n                        block.complexityData\n                    );\n\n                    if (highlightSegment) {\n                        Logger.debug(`  → Registered segment ${highlightSegment.id}`);\n                    }\n                });\n\n                Logger.info(`DetectionCoordinator: Successfully registered ${blocks.length} segments from new file`);\n            }\n        }\n",
+    "rangeStart": {
+      "line": 31,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 39,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 14395,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-28T23:43:20.214Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 1343,
+    "completeText": "                // Register blocks with BlockManager\n                if (this._blockManager) {\n                    blocks.forEach((block, idx) => {\n                        const blockId = this._blockManager!.registerDetectedBlock(\n                            document.fileName,\n                            block.startLine,\n                            block.endLine,\n                            {\n                                blockNo: idx,\n                                detectedAt: block.timestamp,\n                                linesChanged: block.endLine - block.startLine + 1,\n                                coreChangeStart: block.coreChangeStart,\n                                coreChangeEnd: block.coreChangeEnd,\n                                expandedContext: block.expandedContext,\n                                complexityScore: block.complexityScore,\n                                complexityData: block.complexityData,\n                                functions: block.functions\n                            }\n                        );\n\n                        Logger.debug(`  → Registered segment ${blockId} for lines ${block.startLine}-${block.endLine}`);\n                    });\n\n                    Logger.info(`DetectionCoordinator: Successfully registered ${blocks.length} segments from new file`);\n                }\n",
+    "rangeStart": {
+      "line": 51,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 68,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 28805,
+    "documentVersion": 3
+  }
+]

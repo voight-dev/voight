@@ -1,0 +1,17 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 114,
+      "line_number_end": 115,
+      "code": "                            title=\"Mark as reviewed\">\n                            <span class=\"codicon codicon-check\"></span>",
+      "timestamp": "2025-12-28T00:17:54.946Z",
+      "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-27T23-49-27-822Z",
+    "totalBlocks": 1,
+    "lastUpdated": "2025-12-28T00:17:54.948Z"
+  }
+}

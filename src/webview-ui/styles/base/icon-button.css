@@ -1,0 +1,67 @@
+/**
+ * IconButton Component Styles
+ *
+ * Design System:
+ * - Compact icon-only buttons
+ * - Clear hover and active states
+ * - VSCode toolbar-style appearance
+ * - Accessible focus indicators
+ */
+
+/* Base Icon Button */
+.vk-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background-color: transparent;
+    color: var(--vscode-foreground);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    outline: none;
+}
+
+.vk-icon-button:hover:not(:disabled) {
+    background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.vk-icon-button:active:not(:disabled) {
+    background-color: var(--vscode-toolbar-activeBackground);
+}
+
+.vk-icon-button:focus-visible {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: -1px;
+}
+
+.vk-icon-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Icon */
+.vk-icon-button .codicon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* Variants for different contexts */
+.vk-icon-button--danger {
+    color: var(--vscode-errorForeground);
+}
+
+.vk-icon-button--danger:hover:not(:disabled) {
+    background-color: var(--vscode-inputValidation-errorBackground);
+}
+
+.vk-icon-button--success {
+    color: var(--vscode-charts-green);
+}
+
+.vk-icon-button--warning {
+    color: var(--vscode-charts-orange);
+}

@@ -1,0 +1,41 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 33,
+      "line_number_end": 33,
+      "code": "    DISMISSED = 'dismissed'    // User dismissed/ignored",
+      "timestamp": "2025-12-29T22:07:52.461Z",
+      "file": "/Users/swarit-dev/voight/src/ui/highlighter.ts"
+    },
+    {
+      "block_no": 1,
+      "line_number_start": 258,
+      "line_number_end": 258,
+      "code": "                   this.highlighter.getSegmentsByState(SegmentState.DISMISSED).length,",
+      "timestamp": "2025-12-29T22:09:11.778Z",
+      "file": "/Users/swarit-dev/voight/src/ui/blockManager.ts"
+    },
+    {
+      "block_no": 3,
+      "line_number_start": 263,
+      "line_number_end": 263,
+      "code": "            dismissed: this.highlighter.getSegmentsByState(SegmentState.DISMISSED).length",
+      "timestamp": "2025-12-29T22:09:11.778Z",
+      "file": "/Users/swarit-dev/voight/src/ui/blockManager.ts"
+    },
+    {
+      "block_no": 3,
+      "line_number_start": 119,
+      "line_number_end": 119,
+      "code": "\t\t\t`Blocks: ${stats.total} total | ${stats.detected} detected | ${stats.reviewed} reviewed | ${stats.flagged} flagged | ${stats.accepted} accepted`",
+      "timestamp": "2025-12-29T22:09:39.393Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-29T22-06-21-480Z",
+    "totalBlocks": 4,
+    "lastUpdated": "2025-12-29T22:09:39.394Z"
+  }
+}

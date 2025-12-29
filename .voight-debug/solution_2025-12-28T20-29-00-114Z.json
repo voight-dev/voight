@@ -1,0 +1,81 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 423,
+      "line_number_end": 426,
+      "code": "            // Allow gaps up to 10 lines if they're mostly empty/whitespace\n            if (gap <= 10) {\n                // Always extend for small gaps\n                if (gap <= 3) {",
+      "timestamp": "2025-12-28T20:35:43.374Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 428,
+      "line_number_end": 441,
+      "code": "                } else {\n                    // For larger gaps (4-10), check if gap is mostly empty\n                    let emptyOrSimpleLines = 0;\n                    for (let gapLine = rangeEnd + 1; gapLine < line; gapLine++) {\n                        const text = document.lineAt(gapLine).text.trim();\n                        if (text === '' || text === '{' || text === '}' ||\n                            text === '};' || text === '});' || text.startsWith('//')) {\n                            emptyOrSimpleLines++;\n                        }\n                    }\n                    // If >70% of gap lines are empty/simple, extend the range\n                    if (emptyOrSimpleLines / (gap - 1) > 0.7) {\n                        shouldExtend = true;\n                    }",
+      "timestamp": "2025-12-28T20:35:43.374Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 214,
+      "line_number_end": 214,
+      "code": "     * Shows count of unseen segments (not interacted with yet)",
+      "timestamp": "2025-12-28T20:45:41.361Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 223,
+      "line_number_end": 251,
+      "code": "        // Count segments that haven't been interacted with yet\n        // A segment is \"seen\" if ANY of these conditions are true:\n        // - Reviewed or dismissed\n        // - Starred\n        // - Has context notes\n        // - Has AI explanation\n        const unseenCount = blocks.filter((block: HighlightSegment) => {\n            // Dismissed or reviewed = seen\n            if (block.state === SegmentState.REVIEWED || block.state === SegmentState.DISMISSED) {\n                return false;\n            }\n\n            // Starred = seen\n            if (block.metadata?.isStarred === true) {\n                return false;\n            }\n\n            // Has context = seen\n            if (block.metadata?.context && block.metadata.context.trim().length > 0) {\n                return false;\n            }\n\n            // Has AI explanation = seen\n            if (block.metadata?.explanation && block.metadata.explanation.trim().length > 0) {\n                return false;\n            }\n\n            // Not interacted with = unseen\n            return true;",
+      "timestamp": "2025-12-28T20:45:41.361Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 6,
+      "line_number_start": 254,
+      "line_number_end": 254,
+      "code": "        if (unseenCount > 0) {",
+      "timestamp": "2025-12-28T20:45:41.361Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 8,
+      "line_number_start": 256,
+      "line_number_end": 257,
+      "code": "                tooltip: `${unseenCount} unseen segment${unseenCount !== 1 ? 's' : ''}`,\n                value: unseenCount",
+      "timestamp": "2025-12-28T20:45:41.361Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 6,
+      "line_number_start": 150,
+      "line_number_end": 151,
+      "code": "                            // Update badge after star action\n                            this._updateBadge();",
+      "timestamp": "2025-12-28T20:48:47.961Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 7,
+      "line_number_start": 92,
+      "line_number_end": 94,
+      "code": "                            // Update badge after context action\n                            this._updateBadge();\n",
+      "timestamp": "2025-12-28T20:49:15.942Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    },
+    {
+      "block_no": 8,
+      "line_number_start": 562,
+      "line_number_end": 564,
+      "code": "            // Update badge after AI explanation\n            this._updateBadge();\n",
+      "timestamp": "2025-12-28T20:49:44.985Z",
+      "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-28T20-29-00-114Z",
+    "totalBlocks": 9,
+    "lastUpdated": "2025-12-28T20:49:44.985Z"
+  }
+}

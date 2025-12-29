@@ -1,0 +1,74 @@
+[
+  {
+    "timestamp": "2025-12-27T23:34:45.385Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 261,
+    "completeText": "                            class=\"vk-icon-button dismiss-btn\"\n                            title=\"Dismiss without review\">\n                            <span class=\"codicon codicon-close\"></span>\n                        </button>\n                        <button\n",
+    "rangeStart": {
+      "line": 109,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 109,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1766878485385,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T23:35:10.675Z",
+    "file": "/Users/swarit-dev/voight/webview-ui/src/segments.js",
+    "detected": true,
+    "textLength": 390,
+    "completeText": "        // Handle Dismiss button\n        const dismissBtn = target.closest('.dismiss-btn');\n        if (dismissBtn) {\n            const card = dismissBtn.closest('[data-segment-id]');\n            if (card) {\n                e.preventDefault();\n                const segmentId = card.dataset.segmentId;\n                dismissSegment(segmentId);\n            }\n            return;\n        }\n\n",
+    "rangeStart": {
+      "line": 914,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 914,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 25290,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-27T23:35:48.643Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 1098,
+    "completeText": "        // Filter: Show all segments from the currently active file, except reviewed/dismissed ones\n        // Exception: Always show starred or segments with context notes\n        const filteredBlocks = blocks.filter((block: HighlightSegment) => {\n            // Only show segments from the active file\n            if (block.filePath !== activeFilePath) {\n                Logger.debug(`  Block ${block.id} filtered out: file path mismatch`);\n                return false;\n            }\n\n            // Check if segment is reviewed or dismissed\n            const isReviewedOrDismissed = block.state === SegmentState.REVIEWED || block.state === SegmentState.DISMISSED;\n\n            // Always show if starred or has context (even if reviewed/dismissed)\n            const hasContext = block.metadata?.context && block.metadata.context.trim().length > 0;\n            const isStarred = block.metadata?.isStarred === true;\n\n            if (isReviewedOrDismissed && !hasContext && !isStarred) {\n                Logger.debug(`  Block ${block.id} filtered out: reviewed/dismissed without star or context`);\n",
+    "rangeStart": {
+      "line": 263,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 269,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 37968,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-27T23:36:06.649Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 64,
+    "completeText": "import { HighlightSegment, SegmentState } from './highlighter';\n",
+    "rangeStart": {
+      "line": 7,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 8,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 18006,
+    "documentVersion": 3
+  }
+]

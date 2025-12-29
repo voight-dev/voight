@@ -1,0 +1,7 @@
+node_modules
+
+# AI agent context files (hidden from version control)
+.ai/
+
+# Development VSIX (local testing only)
+voight-dev.vsix
