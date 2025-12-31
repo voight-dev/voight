@@ -1,0 +1,686 @@
+[
+  {
+    "timestamp": "2025-12-30T07:35:22.176Z",
+    "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts",
+    "detected": true,
+    "textLength": 833,
+    "completeText": "     * Initialize tracking for a newly created file\n     * Sets shadow state to EMPTY so all content is detected as AI-generated\n     */\n    public initializeNewFile(filePath: string): void {\n        if (!this._shadowDocuments.has(filePath)) {\n            // Initialize shadow state as empty document\n            // This ensures all content in the new file is detected as AI-generated\n            const emptySnapshot: DocumentSnapshot = {\n                lines: [],\n                version: 0,\n                timestamp: Date.now()\n            };\n            this._shadowDocuments.set(filePath, emptySnapshot);\n            Logger.info(`ChangeDetector: Initialized NEW FILE with empty shadow state: ${filePath}`);\n        } else {\n            Logger.debug(`ChangeDetector: File already tracked ${filePath}`);\n        }\n    }\n\n    /**\n",
+    "rangeStart": {
+      "line": 72,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 72,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 1767080122176,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-30T07:35:38.156Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 904,
+    "completeText": "import { FileRegistry } from '../tracking/fileRegistry';\n\n/**\n * Coordinates detection, UI updates, and debug logging\n * This is the main entry point for the detection system\n */\nexport class DetectionCoordinator {\n    private _changeDetector: ChangeDetector;\n    private _pasteDetector: PasteDetector;\n    private _blockManager?: BlockManager;\n    private _debugLogger?: DebugLogger;\n    private _filePatternMatcher: FilePatternMatcher;\n    private _fileRegistry: FileRegistry;\n\n    constructor(\n        fileRegistry: FileRegistry,\n        blockManager?: BlockManager,\n        debugLogger?: DebugLogger\n    ) {\n        this._changeDetector = new ChangeDetector();\n        this._pasteDetector = new PasteDetector();\n        this._blockManager = blockManager;\n        this._debugLogger = debugLogger;\n        this._filePatternMatcher = new FilePatternMatcher();\n        this._fileRegistry = fileRegistry;\n",
+    "rangeStart": {
+      "line": 7,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 28,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 15980,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-30T07:36:01.418Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 787,
+    "completeText": "        // Check if this is a NEW file that wasn't tracked at startup\n        const isNewFile = !this._fileRegistry.isKnown(filePath);\n        if (isNewFile) {\n            Logger.info(`DetectionCoordinator: NEW FILE DETECTED - ${filePath}`);\n            // Initialize with empty shadow state so all content is detected\n            this._changeDetector.initializeNewFile(filePath);\n            // Register as known so we don't treat it as new again\n            this._fileRegistry.register(filePath);\n        }\n\n        Logger.debug(`\\n=== Document Change Event ===`);\n        Logger.debug(`File: ${filePath}`);\n        Logger.debug(`Total chunks: ${event.contentChanges.length}`);\n        if (isNewFile) {\n            Logger.debug(`Status: NEW FILE - will detect all content`);\n        }\n",
+    "rangeStart": {
+      "line": 73,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 76,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 23262,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-30T07:36:19.409Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 294,
+    "completeText": "import { FileRegistry } from './tracking/fileRegistry';\n\nlet coordinator: DetectionCoordinator;\nlet blockManager: BlockManager;\nlet contextNotesManager: ContextNotesManager;\nlet debugLogger: DebugLogger | undefined;\nlet fileTrackingService: FileTrackingService;\nlet fileRegistry: FileRegistry;\n",
+    "rangeStart": {
+      "line": 14,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 20,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 17991,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-30T07:36:36.497Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 1504,
+    "completeText": "\t// Initialize file registry to track existing files\n\tfileRegistry = new FileRegistry();\n\tawait fileRegistry.initialize(workspaceRoot);\n\tLogger.info(`File registry initialized with ${fileRegistry.getCount()} files`);\n\n\t// Initialize UI layer\n\tconst highlighter = createDefaultHighlighter();\n\tblockManager = new BlockManager(highlighter, segmentRepository, fileTrackingService);\n\n\t// Initialize context notes manager\n\tcontextNotesManager = new ContextNotesManager(context);\n\t// Wire up BlockManager so notes are stored as part of segments\n\tcontextNotesManager.setBlockManager(blockManager);\n\n\t// Register segments webview for Activity Bar sidebar\n\tconst segmentsWebviewProvider = new SegmentsWebviewProvider(context.extensionUri, blockManager, contextNotesManager);\n\tcontext.subscriptions.push(\n\t\tvscode.window.registerWebviewViewProvider(\n\t\t\tSegmentsWebviewProvider.viewType,\n\t\t\tsegmentsWebviewProvider\n\t\t)\n\t);\n\n\t// Register action plugins\n\tblockManager.highlighter.registerActionPlugin(new ReviewPlugin());\n\tblockManager.highlighter.registerActionPlugin(new AnalyzePlugin());\n\n\t// Initialize debug logger only if debug mode is enabled\n\tif (debugMode) {\n\t\tdebugLogger = new DebugLogger(workspaceRoot);\n\t\tLogger.info('Debug logger initialized - JSON files will be saved to .voight-debug/');\n\t} else {\n\t\tdebugLogger = undefined;\n\t}\n\n\t// Initialize detection coordinator with file registry, UI and optional debug integration\n\tcoordinator = new DetectionCoordinator(fileRegistry, blockManager, debugLogger);\n",
+    "rangeStart": {
+      "line": 61,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 93,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 17088,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-30T07:36:47.877Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 295,
+    "completeText": "        // Register file with registry if not already known\n        if (!this._fileRegistry.isKnown(document.fileName)) {\n            this._fileRegistry.register(document.fileName);\n            Logger.debug(`DetectionCoordinator: Registered newly opened file: ${document.fileName}`);\n        }\n\n",
+    "rangeStart": {
+      "line": 51,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 51,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 11380,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-30T07:46:35.481Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 338,
+    "completeText": "\n\t// Get extension version from package.json\n\tconst extension = vscode.extensions.getExtension('undefined_publisher.voight');\n\tconst version = extension?.packageJSON?.version || 'unknown';\n\n\tLogger.info(`=== Voight v${version} ===`);\n\tLogger.info(`Debug mode: ${debugMode ? 'ENABLED' : 'DISABLED'}`);\n\tLogger.info(`Extension activated`);\n",
+    "rangeStart": {
+      "line": 30,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 31,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 587604,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-30T07:47:02.702Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 801,
+    "completeText": "        // Check if this is a file that existed at startup\n        const isKnownFile = this._fileRegistry.isKnown(document.fileName);\n\n        if (isKnownFile) {\n            // File existed at startup - initialize shadow state to current content\n            // This prevents treating existing file content as AI-generated\n            this._changeDetector.initializeDocument(document);\n            Logger.info(`DetectionCoordinator: Initialized tracking for existing file: ${document.fileName}`);\n        } else {\n            // File was NOT in workspace at startup - this is a NEW file\n            // Don't register it yet, let analyzeEvent handle it on first edit\n            Logger.info(`DetectionCoordinator: Detected unopened new file (will track on first edit): ${document.fileName}`);\n        }\n",
+    "rangeStart": {
+      "line": 51,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 60,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 27221,
+    "documentVersion": 5
+  },
+  {
+    "timestamp": "2025-12-30T07:53:23.963Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 1097,
+    "completeText": "            Logger.info(`🆕 NEW FILE DETECTED - ${filePath}`);\n            // Initialize with empty shadow state so all content is detected\n            this._changeDetector.initializeNewFile(filePath);\n            // Register as known so we don't treat it as new again\n            this._fileRegistry.register(filePath);\n        }\n\n        Logger.info(`\\n=== Document Change Event ===`);\n        Logger.info(`File: ${filePath}`);\n        Logger.info(`Total chunks: ${event.contentChanges.length}`);\n        if (isNewFile) {\n            Logger.info(`Status: ✨ NEW FILE - will detect all content`);\n        }\n\n        // Log details about each change chunk\n        event.contentChanges.forEach((change, idx) => {\n            const preview = change.text.substring(0, 100).replace(/\\n/g, '\\\\n');\n            Logger.debug(`  Chunk ${idx + 1}: ${change.text.length} chars, range: ${change.range.start.line}:${change.range.start.character}-${change.range.end.line}:${change.range.end.character}`);\n            Logger.debug(`    Preview: \"${preview}${change.text.length > 100 ? '...' : ''}\"`);\n        });\n",
+    "rangeStart": {
+      "line": 86,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 99,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 381261,
+    "documentVersion": 6
+  },
+  {
+    "timestamp": "2025-12-30T07:53:43.352Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 352,
+    "completeText": "            Logger.info(`❌ Not detected as paste operation - skipping block detection`);\n            if (isNewFile) {\n                Logger.warn(`⚠️  NEW FILE but not paste! This means the content won't be tracked. Consider manual review.`);\n            }\n            return;\n        }\n\n        Logger.info('✅ Paste detected - analyzing changes...');\n",
+    "rangeStart": {
+      "line": 120,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 125,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 19389,
+    "documentVersion": 7
+  },
+  {
+    "timestamp": "2025-12-30T07:55:46.260Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 796,
+    "completeText": "\t// Get extension version and running mode\n\tconst extension = vscode.extensions.getExtension('undefined_publisher.voight');\n\tconst version = extension?.packageJSON?.version || 'unknown';\n\n\t// Determine if we're running in development/debug mode (F5) or packaged mode\n\tconst extensionMode = context.extensionMode;\n\tlet modeString = 'Unknown';\n\n\tswitch (extensionMode) {\n\t\tcase vscode.ExtensionMode.Production:\n\t\t\tmodeString = 'Production (Packaged VSIX)';\n\t\t\tbreak;\n\t\tcase vscode.ExtensionMode.Development:\n\t\t\tmodeString = 'Development (F5 Debug)';\n\t\t\tbreak;\n\t\tcase vscode.ExtensionMode.Test:\n\t\t\tmodeString = 'Test Mode';\n\t\t\tbreak;\n\t}\n\n\tLogger.info(`=== Voight v${version} ===`);\n\tLogger.info(`Extension mode: ${modeString}`);\n\tLogger.info(`Debug logging: ${debugMode ? 'ENABLED' : 'DISABLED'}`);\n",
+    "rangeStart": {
+      "line": 31,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 37,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 122908,
+    "documentVersion": 5
+  },
+  {
+    "timestamp": "2025-12-30T07:56:14.546Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 591,
+    "completeText": "            Logger.info(`NEW FILE DETECTED - ${filePath}`);\n            // Initialize with empty shadow state so all content is detected\n            this._changeDetector.initializeNewFile(filePath);\n            // Register as known so we don't treat it as new again\n            this._fileRegistry.register(filePath);\n        }\n\n        Logger.info(`\\n=== Document Change Event ===`);\n        Logger.info(`File: ${filePath}`);\n        Logger.info(`Total chunks: ${event.contentChanges.length}`);\n        if (isNewFile) {\n            Logger.info(`Status: NEW FILE - will detect all content`);\n",
+    "rangeStart": {
+      "line": 86,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 98,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 28286,
+    "documentVersion": 8
+  },
+  {
+    "timestamp": "2025-12-30T07:56:23.331Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 353,
+    "completeText": "            Logger.info(`NOT detected as paste operation - skipping block detection`);\n            if (isNewFile) {\n                Logger.warn(`WARNING: NEW FILE but not paste! This means the content won't be tracked. Consider manual review.`);\n            }\n            return;\n        }\n\n        Logger.info('PASTE DETECTED - analyzing changes...');\n",
+    "rangeStart": {
+      "line": 120,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 128,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 8785,
+    "documentVersion": 9
+  },
+  {
+    "timestamp": "2025-12-30T08:01:17.562Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 902,
+    "completeText": "\t// Watch for files created on disk (by AI tools, external processes, etc.)\n\tconst fileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*');\n\tconst fileCreateListener = fileSystemWatcher.onDidCreate(async (uri) => {\n\t\tif (uri.scheme !== 'file') {\n\t\t\treturn;\n\t\t}\n\n\t\tLogger.info(`File system: New file created on disk - ${uri.fsPath}`);\n\n\t\t// Check if file is already known\n\t\tif (!fileRegistry.isKnown(uri.fsPath)) {\n\t\t\tLogger.info(`File system: This is a NEW file, will track its content`);\n\n\t\t\t// Open the file to read its content\n\t\t\ttry {\n\t\t\t\tconst document = await vscode.workspace.openTextDocument(uri);\n\n\t\t\t\t// Treat the entire file as AI-generated\n\t\t\t\tLogger.info(`File system: Processing new file with ${document.lineCount} lines`);\n\t\t\t\tcoordinator.handleNewFileCreated(document);\n\t\t\t} catch (error) {\n\t\t\t\tLogger.warn(`File system: Failed to open new file: ${error}`);\n\t\t\t}\n\t\t}\n\t});\n\n",
+    "rangeStart": {
+      "line": 138,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 138,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 294231,
+    "documentVersion": 6
+  },
+  {
+    "timestamp": "2025-12-30T08:01:51.232Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 2662,
+    "completeText": "     * Handle a new file that was created on disk (by AI tools, external processes, etc.)\n     * This bypasses paste detection and directly processes the file content\n     */\n    public handleNewFileCreated(document: vscode.TextDocument): void {\n        const filePath = document.fileName;\n\n        Logger.info(`\\n=== New File Created on Disk ===`);\n        Logger.info(`File: ${filePath}`);\n        Logger.info(`Lines: ${document.lineCount}`);\n\n        // Check if file should be excluded\n        if (this._filePatternMatcher.shouldExclude(filePath)) {\n            Logger.debug(`DetectionCoordinator: File excluded by pattern: ${filePath}`);\n            return;\n        }\n\n        // Check if this is truly a new file\n        const isNewFile = !this._fileRegistry.isKnown(filePath);\n        if (!isNewFile) {\n            Logger.debug(`DetectionCoordinator: File already known, skipping`);\n            return;\n        }\n\n        Logger.info(`NEW FILE DETECTED - ${filePath}`);\n\n        // Initialize with empty shadow state so all content is detected\n        this._changeDetector.initializeNewFile(filePath);\n\n        // Register as known so we don't treat it as new again\n        this._fileRegistry.register(filePath);\n\n        // Detect changed blocks - this will detect all content since shadow is empty\n        const blocks = this._changeDetector.detectChanges(document);\n\n        if (blocks.length === 0) {\n            Logger.warn(`No blocks detected in new file - file may be empty or whitespace-only`);\n            return;\n        }\n\n        Logger.info(`Detected ${blocks.length} code blocks in new file`);\n\n        // Register with UI\n        if (this._blockManager) {\n            blocks.forEach((block, idx) => {\n                const blockId = this._blockManager!.registerDetectedBlock(\n                    filePath,\n                    block.startLine,\n                    block.endLine,\n                    {\n                        blockNo: idx,\n                        detectedAt: block.timestamp,\n                        linesChanged: block.endLine - block.startLine + 1,\n                        coreChangeStart: block.coreChangeStart,\n                        coreChangeEnd: block.coreChangeEnd,\n                        expandedContext: block.expandedContext,\n                        complexityScore: block.complexityScore,\n                        complexityData: block.complexityData,\n                        functions: block.functions\n                    }\n                );\n                Logger.debug(`  ✓ Registered ${blockId} with UI`);\n            });\n        }\n\n        Logger.info(`=== File Processing Complete ===\\n`);\n    }\n\n    /**\n",
+    "rangeStart": {
+      "line": 190,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 190,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 33670,
+    "documentVersion": 10
+  },
+  {
+    "timestamp": "2025-12-30T08:02:13.502Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 43,
+    "completeText": "\t\tfileSystemWatcher,\n\t\tfileCreateListener,\n",
+    "rangeStart": {
+      "line": 376,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 376,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 22270,
+    "documentVersion": 7
+  },
+  {
+    "timestamp": "2025-12-30T08:03:59.001Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 696,
+    "completeText": "\t\t\t// Wait a brief moment to see if user is actively editing this file\n\t\t\t// If they are, let normal paste detection handle it instead\n\t\t\tawait new Promise(resolve => setTimeout(resolve, 500));\n\n\t\t\t// Check if there's an active editor for this file\n\t\t\tconst activeEditor = vscode.window.activeTextEditor;\n\t\t\tconst isActivelyEditing = activeEditor?.document.uri.fsPath === uri.fsPath;\n\n\t\t\tif (isActivelyEditing) {\n\t\t\t\tLogger.info(`File system: User is actively editing this file - will use normal paste detection`);\n\t\t\t\t// Register the file so it's known, but don't process it yet\n\t\t\t\t// Normal paste detection will handle subsequent edits\n\t\t\t\tfileRegistry.register(uri.fsPath);\n\t\t\t\treturn;\n\t\t\t}\n\n",
+    "rangeStart": {
+      "line": 151,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 151,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 105499,
+    "documentVersion": 8
+  },
+  {
+    "timestamp": "2025-12-30T08:11:37.741Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 932,
+    "completeText": "\t\t\tLogger.info(`File system: This is a NEW file - marking for tracking`);\n\n\t\t\t// Wait a brief moment to see if user is actively editing this file\n\t\t\tawait new Promise(resolve => setTimeout(resolve, 500));\n\n\t\t\t// Check if there's an active editor for this file\n\t\t\tconst activeEditor = vscode.window.activeTextEditor;\n\t\t\tconst isActivelyEditing = activeEditor?.document.uri.fsPath === uri.fsPath;\n\n\t\t\tif (isActivelyEditing) {\n\t\t\t\tLogger.info(`File system: User is actively editing - will use normal paste detection`);\n\t\t\t\t// Don't register yet - let initializeDocument handle it\n\t\t\t\treturn;\n\t\t\t}\n\n\t\t\t// File was created by AI/external tool and not actively being edited\n\t\t\t// Mark it as a \"pending new file\" that should be fully tracked when opened\n\t\t\tLogger.info(`File system: Marking as AI-generated file (will process when opened)`);\n\t\t\t// Don't register it - this keeps it \"unknown\" so initializeDocument will handle it specially\n",
+    "rangeStart": {
+      "line": 149,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 177,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 458740,
+    "documentVersion": 9
+  },
+  {
+    "timestamp": "2025-12-30T08:11:53.282Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 217,
+    "completeText": "            // Process it as AI-generated content\n            Logger.info(`DetectionCoordinator: NEW FILE opened - will process entire content: ${document.fileName}`);\n            this.handleNewFileCreated(document);\n",
+    "rangeStart": {
+      "line": 61,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 63,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 15541,
+    "documentVersion": 11
+  },
+  {
+    "timestamp": "2025-12-30T08:15:49.147Z",
+    "file": "/Users/swarit-dev/voight/src/ui/blockManager.ts",
+    "detected": true,
+    "textLength": 2535,
+    "completeText": "     *\n     * Includes deduplication: if a segment with the same file path and line range\n     * already exists, returns the existing segment ID instead of creating a duplicate\n     */\n    public registerDetectedBlock(\n        filePath: string,\n        startLine: number,\n        endLine: number,\n        metadata?: Record<string, any>\n    ): string {\n        // Check for existing segment with same file path and line range\n        const existingSegment = this._findDuplicateSegment(filePath, startLine, endLine);\n\n        if (existingSegment) {\n            Logger.warn(`Duplicate segment detected: ${filePath}:${startLine}-${endLine} (existing: ${existingSegment.id})`);\n            Logger.debug(`Skipping duplicate - using existing segment ${existingSegment.id}`);\n            return existingSegment.id;\n        }\n\n        const blockId = this._generateBlockId();\n\n        const block: HighlightSegment = {\n            id: blockId,\n            filePath,\n            startLine,\n            endLine,\n            state: SegmentState.DETECTED,\n            metadata: {\n                detectedAt: new Date().toISOString(),\n                ...metadata\n            }\n        };\n\n        this.highlighter.addSegment(block);\n        Logger.debug(`Registered block ${blockId}: ${filePath}:${startLine}-${endLine}`);\n\n        // Persist segment\n        this._persistSegment(block).catch(error => {\n            Logger.error(`Failed to persist segment: ${error}`);\n        });\n\n        // Track this edit in the file tracking service\n        if (this._fileTrackingService) {\n            this._fileTrackingService.recordEdit(\n                filePath,\n                startLine,\n                endLine,\n                metadata?.complexityScore\n            ).catch(error => {\n                Logger.error(`Failed to track file edit: ${error}`);\n            });\n        }\n\n        // Notify callbacks\n        this._onBlockRegisteredCallbacks.forEach(callback => callback());\n\n        return blockId;\n    }\n\n    /**\n     * Find a duplicate segment with the same file path and line range\n     * Returns the existing segment if found, undefined otherwise\n     */\n    private _findDuplicateSegment(\n        filePath: string,\n        startLine: number,\n        endLine: number\n    ): HighlightSegment | undefined {\n        const allSegments = this.getAllBlocks();\n\n        return allSegments.find(segment =>\n            segment.filePath === filePath &&\n            segment.startLine === startLine &&\n            segment.endLine === endLine\n        );\n",
+    "rangeStart": {
+      "line": 108,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 153,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 235865,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-30T08:30:30.308Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 2140,
+    "completeText": "     * Treats the entire file as a single segment (no shadow state diffing)\n     */\n    public handleNewFileCreated(document: vscode.TextDocument): void {\n        const filePath = document.fileName;\n\n        Logger.info(`\\n=== New File Created on Disk ===`);\n        Logger.info(`File: ${filePath}`);\n        Logger.info(`Lines: ${document.lineCount}`);\n\n        // Check if file should be excluded\n        if (this._filePatternMatcher.shouldExclude(filePath)) {\n            Logger.debug(`DetectionCoordinator: File excluded by pattern: ${filePath}`);\n            return;\n        }\n\n        // Check if this is truly a new file\n        const isNewFile = !this._fileRegistry.isKnown(filePath);\n        if (!isNewFile) {\n            Logger.debug(`DetectionCoordinator: File already known, skipping`);\n            return;\n        }\n\n        Logger.info(`NEW FILE DETECTED - ${filePath}`);\n\n        // Register as known so we don't treat it as new again\n        this._fileRegistry.register(filePath);\n\n        // Initialize shadow state with current content for future edits\n        this._changeDetector.initializeDocument(document);\n\n        // Skip empty files\n        if (document.lineCount === 0) {\n            Logger.warn(`New file is empty - skipping segment creation`);\n            return;\n        }\n\n        Logger.info(`Creating single segment for entire file (0-${document.lineCount - 1})`);\n\n        // Register entire file as a single segment with UI\n        if (this._blockManager) {\n            const blockId = this._blockManager.registerDetectedBlock(\n                filePath,\n                0,\n                document.lineCount - 1,\n                {\n                    blockNo: 0,\n                    detectedAt: Date.now(),\n                    linesChanged: document.lineCount,\n                    coreChangeStart: 0,\n                    coreChangeEnd: document.lineCount - 1,\n                    expandedContext: false,\n                    complexityScore: 0,\n                    isNewFile: true\n                }\n            );\n            Logger.info(`  ✓ Registered ${blockId} as single segment for entire new file`);\n",
+    "rangeStart": {
+      "line": 192,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 253,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 881161,
+    "documentVersion": 12
+  },
+  {
+    "timestamp": "2025-12-30T08:30:41.907Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 167,
+    "completeText": "        Logger.info(`\\n=== Document Change Event ===`);\n        Logger.info(`File: ${filePath}`);\n        Logger.info(`Total chunks: ${event.contentChanges.length}`);\n",
+    "rangeStart": {
+      "line": 84,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 100,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 11599,
+    "documentVersion": 13
+  },
+  {
+    "timestamp": "2025-12-30T08:30:53.514Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": false,
+    "textLength": 0,
+    "completeText": "",
+    "rangeStart": {
+      "line": 109,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 112,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 11607,
+    "documentVersion": 14
+  },
+  {
+    "timestamp": "2025-12-30T22:42:00.949Z",
+    "file": "/Users/swarit-dev/voight/src/ui/blockManager.ts",
+    "detected": true,
+    "textLength": 1049,
+    "completeText": "     * Remove all segments for a specific file\n     * Used when a file is deleted from disk\n     */\n    public removeSegmentsForFile(filePath: string): void {\n        const segments = this.highlighter.getSegmentsForFile(filePath);\n\n        if (segments.length === 0) {\n            Logger.debug(`No segments found for deleted file: ${filePath}`);\n            return;\n        }\n\n        Logger.info(`Removing ${segments.length} segments for deleted file: ${filePath}`);\n\n        // Remove each segment\n        segments.forEach(segment => {\n            this.highlighter.removeSegment(segment.id);\n            this._segmentRepository.delete(segment.filePath, segment.startLine, segment.endLine).catch((error: Error) => {\n                Logger.error(`Failed to delete segment from repository: ${error}`);\n            });\n        });\n\n        Logger.info(`Successfully removed all segments for deleted file: ${filePath}`);\n\n        // Notify callbacks to update UI\n        this._onBlockRegisteredCallbacks.forEach(callback => callback());\n    }\n\n    /**\n",
+    "rangeStart": {
+      "line": 261,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 261,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 51067435,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-30T22:42:35.854Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 1892,
+    "completeText": "\t// Watch for files created and deleted on disk (by AI tools, external processes, etc.)\n\tconst fileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*');\n\n\tconst fileCreateListener = fileSystemWatcher.onDidCreate(async (uri) => {\n\t\tif (uri.scheme !== 'file') {\n\t\t\treturn;\n\t\t}\n\n\t\tLogger.info(`File system: New file created on disk - ${uri.fsPath}`);\n\n\t\t// Check if file is already known\n\t\tif (!fileRegistry.isKnown(uri.fsPath)) {\n\t\t\tLogger.info(`File system: This is a NEW file - marking for tracking`);\n\n\t\t\t// Wait a brief moment to see if user is actively editing this file\n\t\t\tawait new Promise(resolve => setTimeout(resolve, 500));\n\n\t\t\t// Check if there's an active editor for this file\n\t\t\tconst activeEditor = vscode.window.activeTextEditor;\n\t\t\tconst isActivelyEditing = activeEditor?.document.uri.fsPath === uri.fsPath;\n\n\t\t\tif (isActivelyEditing) {\n\t\t\t\tLogger.info(`File system: User is actively editing - will use normal paste detection`);\n\t\t\t\t// Don't register yet - let initializeDocument handle it\n\t\t\t\treturn;\n\t\t\t}\n\n\t\t\t// File was created by AI/external tool and not actively being edited\n\t\t\t// Mark it as a \"pending new file\" that should be fully tracked when opened\n\t\t\tLogger.info(`File system: Marking as AI-generated file (will process when opened)`);\n\t\t\t// Don't register it - this keeps it \"unknown\" so initializeDocument will handle it specially\n\t\t}\n\t});\n\n\tconst fileDeleteListener = fileSystemWatcher.onDidDelete((uri) => {\n\t\tif (uri.scheme !== 'file') {\n\t\t\treturn;\n\t\t}\n\n\t\tconst filePath = uri.fsPath;\n\t\tLogger.info(`File system: File deleted - ${filePath}`);\n\n\t\t// Remove from file registry\n\t\tfileRegistry.unregister(filePath);\n\n\t\t// Remove all segments for this file\n\t\tblockManager.removeSegmentsForFile(filePath);\n\n\t\t// Clear shadow state for this file\n\t\tcoordinator.clearFile(filePath);\n\n\t\tLogger.info(`File system: Cleaned up tracking data for deleted file`);\n",
+    "rangeStart": {
+      "line": 138,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 169,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 34905,
+    "documentVersion": 10
+  },
+  {
+    "timestamp": "2025-12-30T22:48:31.894Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 299,
+    "completeText": "     * Clear shadow state for a specific file\n     * Used when a file is deleted\n     */\n    public clearFile(filePath: string): void {\n        this._changeDetector.clearFile(filePath);\n        Logger.debug(`DetectionCoordinator: Cleared shadow state for deleted file: ${filePath}`);\n    }\n\n    /**\n",
+    "rangeStart": {
+      "line": 238,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 238,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 356040,
+    "documentVersion": 15
+  },
+  {
+    "timestamp": "2025-12-30T22:49:14.047Z",
+    "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts",
+    "detected": true,
+    "textLength": 283,
+    "completeText": "     * Clear shadow state for a specific file\n     * Used when a file is deleted\n     */\n    public clearFile(filePath: string): void {\n        this._shadowDocuments.delete(filePath);\n        Logger.debug(`ChangeDetector: Cleared shadow state for file: ${filePath}`);\n    }\n\n    /**\n",
+    "rangeStart": {
+      "line": 139,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 139,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 42153,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-30T22:50:50.366Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 22,
+    "completeText": "\t\tfileDeleteListener,\n",
+    "rangeStart": {
+      "line": 406,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 406,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 96319,
+    "documentVersion": 11
+  },
+  {
+    "timestamp": "2025-12-30T22:51:05.010Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 245,
+    "completeText": "        // Check if file extension is supported\n        if (!this._isSupportedFileExtension(document.fileName)) {\n            Logger.debug(`DetectionCoordinator: Unsupported file extension: ${document.fileName}`);\n            return;\n        }\n\n",
+    "rangeStart": {
+      "line": 45,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 45,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 14644,
+    "documentVersion": 16
+  },
+  {
+    "timestamp": "2025-12-30T22:51:17.651Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 334,
+    "completeText": "     * Check if file extension is supported\n     * Currently supports: .js, .ts, .py, .go\n     */\n    private _isSupportedFileExtension(filePath: string): boolean {\n        const supportedExtensions = ['.js', '.ts', '.py', '.go', '.tsx', '.jsx'];\n        return supportedExtensions.some(ext => filePath.endsWith(ext));\n    }\n\n    /**\n",
+    "rangeStart": {
+      "line": 37,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 37,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 12641,
+    "documentVersion": 17
+  },
+  {
+    "timestamp": "2025-12-30T22:51:28.406Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 136,
+    "completeText": "        // Check if file extension is supported\n        if (!this._isSupportedFileExtension(filePath)) {\n            return;\n        }\n\n",
+    "rangeStart": {
+      "line": 93,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 93,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 10755,
+    "documentVersion": 18
+  },
+  {
+    "timestamp": "2025-12-30T22:51:39.309Z",
+    "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts",
+    "detected": true,
+    "textLength": 227,
+    "completeText": "        // Check if file extension is supported\n        if (!this._isSupportedFileExtension(filePath)) {\n            Logger.debug(`DetectionCoordinator: Unsupported file extension: ${filePath}`);\n            return;\n        }\n\n",
+    "rangeStart": {
+      "line": 205,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 205,
+      "char": 0
+    },
+    "rangeIsEmpty": true,
+    "timeSinceLastChange": 10903,
+    "documentVersion": 19
+  },
+  {
+    "timestamp": "2025-12-30T22:59:27.484Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 570,
+    "completeText": "import { FileRegistry } from '../tracking/fileRegistry';\n\nexport class SegmentsWebviewProvider implements vscode.WebviewViewProvider {\n    public static readonly viewType = 'voight.segmentsView';\n    private _view?: vscode.WebviewView;\n    private _lastViewedFilePath?: string; // Persist which file's segments we're showing\n\n    constructor(\n        private readonly _extensionUri: vscode.Uri,\n        private readonly _blockManager: BlockManager,\n        private readonly _contextNotesManager: ContextNotesManager,\n        private readonly _fileRegistry: FileRegistry\n",
+    "rangeStart": {
+      "line": 11,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 21,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 468175,
+    "documentVersion": 2
+  },
+  {
+    "timestamp": "2025-12-30T22:59:50.117Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 726,
+    "completeText": "        // Filter out segments from deleted files\n        const allBlocks = this._blockManager.getAllBlocks();\n        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));\n\n        const filteredCount = allBlocks.length - blocks.length;\n        if (filteredCount > 0) {\n            Logger.debug(`[SegmentsWebviewProvider] Filtered out ${filteredCount} segments from deleted files`);\n        }\n\n        Logger.debug(`[SegmentsWebviewProvider] Active file: ${activeFilePath || 'none'}`);\n        Logger.debug(`[SegmentsWebviewProvider] Last viewed file: ${this._lastViewedFilePath || 'none'}`);\n        Logger.debug(`[SegmentsWebviewProvider] Total blocks (after filtering): ${blocks.length}`);\n",
+    "rangeStart": {
+      "line": 406,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 410,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 22633,
+    "documentVersion": 3
+  },
+  {
+    "timestamp": "2025-12-30T22:59:59.245Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 205,
+    "completeText": "        // Filter out segments from deleted files\n        const allBlocks = this._blockManager.getAllBlocks();\n        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));\n",
+    "rangeStart": {
+      "line": 274,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 275,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 9128,
+    "documentVersion": 4
+  },
+  {
+    "timestamp": "2025-12-30T23:00:10.348Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 350,
+    "completeText": "        // Filter out segments from deleted files before grouping\n        const existingBlocks = blocks.filter(block => this._fileRegistry.isKnown(block.filePath));\n\n        // Group blocks by file and count segments\n        const fileMap = new Map<string, { count: number; blocks: HighlightSegment[] }>();\n\n        existingBlocks.forEach(block => {\n",
+    "rangeStart": {
+      "line": 367,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 371,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 11103,
+    "documentVersion": 5
+  },
+  {
+    "timestamp": "2025-12-30T23:00:29.937Z",
+    "file": "/Users/swarit-dev/voight/src/ui/segmentsWebviewProvider.ts",
+    "detected": true,
+    "textLength": 206,
+    "completeText": "        // Filter out segments from deleted files\n        const allBlocks = this._blockManager.getAllBlocks();\n        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));\n\n",
+    "rangeStart": {
+      "line": 345,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 346,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 19589,
+    "documentVersion": 6
+  },
+  {
+    "timestamp": "2025-12-30T23:00:46.454Z",
+    "file": "/Users/swarit-dev/voight/src/extension.ts",
+    "detected": true,
+    "textLength": 133,
+    "completeText": "\tconst segmentsWebviewProvider = new SegmentsWebviewProvider(context.extensionUri, blockManager, contextNotesManager, fileRegistry);\n",
+    "rangeStart": {
+      "line": 100,
+      "char": 0
+    },
+    "rangeEnd": {
+      "line": 101,
+      "char": 0
+    },
+    "rangeIsEmpty": false,
+    "timeSinceLastChange": 16517,
+    "documentVersion": 12
+  }
+]

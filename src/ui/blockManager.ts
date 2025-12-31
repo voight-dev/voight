@@ -106,6 +106,9 @@ export class BlockManager {
      * Register a detected block from the backend
      * Returns the generated block ID
      * Now persists the segment to storage and tracks the edit
+     *
+     * Includes deduplication: if a segment with the same file path and line range
+     * already exists, returns the existing segment ID instead of creating a duplicate
      */
     public registerDetectedBlock(
         filePath: string,
@@ -113,6 +116,15 @@ export class BlockManager {
         endLine: number,
         metadata?: Record<string, any>
     ): string {
+        // Check for existing segment with same file path and line range
+        const existingSegment = this._findDuplicateSegment(filePath, startLine, endLine);
+
+        if (existingSegment) {
+            Logger.warn(`Duplicate segment detected: ${filePath}:${startLine}-${endLine} (existing: ${existingSegment.id})`);
+            Logger.debug(`Skipping duplicate - using existing segment ${existingSegment.id}`);
+            return existingSegment.id;
+        }
+
         const blockId = this._generateBlockId();
 
         const block: HighlightSegment = {
@@ -151,6 +163,24 @@ export class BlockManager {
         this._onBlockRegisteredCallbacks.forEach(callback => callback());
 
         return blockId;
+    }
+
+    /**
+     * Find a duplicate segment with the same file path and line range
+     * Returns the existing segment if found, undefined otherwise
+     */
+    private _findDuplicateSegment(
+        filePath: string,
+        startLine: number,
+        endLine: number
+    ): HighlightSegment | undefined {
+        const allSegments = this.getAllBlocks();
+
+        return allSegments.find(segment =>
+            segment.filePath === filePath &&
+            segment.startLine === startLine &&
+            segment.endLine === endLine
+        );
     }
 
     /**
@@ -226,6 +256,34 @@ export class BlockManager {
                 Logger.error(`Failed to delete segment from repository: ${error}`);
             });
         }
+    }
+
+    /**
+     * Remove all segments for a specific file
+     * Used when a file is deleted from disk
+     */
+    public removeSegmentsForFile(filePath: string): void {
+        const segments = this.highlighter.getSegmentsForFile(filePath);
+
+        if (segments.length === 0) {
+            Logger.debug(`No segments found for deleted file: ${filePath}`);
+            return;
+        }
+
+        Logger.info(`Removing ${segments.length} segments for deleted file: ${filePath}`);
+
+        // Remove each segment
+        segments.forEach(segment => {
+            this.highlighter.removeSegment(segment.id);
+            this._segmentRepository.delete(segment.filePath, segment.startLine, segment.endLine).catch((error: Error) => {
+                Logger.error(`Failed to delete segment from repository: ${error}`);
+            });
+        });
+
+        Logger.info(`Successfully removed all segments for deleted file: ${filePath}`);
+
+        // Notify callbacks to update UI
+        this._onBlockRegisteredCallbacks.forEach(callback => callback());
     }
 
     /**

@@ -58,9 +58,15 @@ body {
 }
 
 .segments-header {
+    position: sticky;
+    top: -12px;
+    z-index: 10;
+    background: var(--vscode-sideBar-background);
     padding: 8px 0 16px 0;
+    margin: -12px -12px 12px -12px;
+    padding-left: 12px;
+    padding-right: 12px;
     border-bottom: 1px solid var(--vscode-panel-border);
-    margin-bottom: 12px;
 }
 
 .segments-header h1 {
@@ -173,7 +179,94 @@ body {
     background: var(--vscode-button-secondaryHoverBackground);
 }
 
-/* Loading animation */
+/* Skeleton loading state */
+.skeleton-loader {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+}
+
+.skeleton-card {
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    padding: 12px;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.skeleton-title {
+    height: 14px;
+    width: 60%;
+    background: var(--vscode-input-background);
+    border-radius: 3px;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.skeleton-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--vscode-input-background);
+    border-radius: 4px;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-badges {
+    display: flex;
+    gap: 8px;
+}
+
+.skeleton-badge {
+    height: 20px;
+    width: 70px;
+    background: var(--vscode-input-background);
+    border-radius: 3px;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes skeletonShimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: 200px 0;
+    }
+}
+
+.skeleton-title,
+.skeleton-icon,
+.skeleton-badge {
+    background: linear-gradient(
+        90deg,
+        var(--vscode-input-background) 0%,
+        var(--vscode-list-hoverBackground) 50%,
+        var(--vscode-input-background) 100%
+    );
+    background-size: 200px 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+/* Loading animation fallback */
 .segment-count:empty::after {
     content: 'Loading...';
     animation: pulse 1.5s ease-in-out infinite;
@@ -269,33 +362,50 @@ body {
 }
 
 .segment-card {
+    position: relative;
     background: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
     border-radius: 4px;
     overflow: hidden;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, transform 0.2s ease;
 }
 
-/* Dismissing animation */
+/* Entrance animation ONLY for truly new segments (opt-in via class) */
+.segment-card.just-added {
+    animation: slideInFromRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Subtle dismissing animation - fade and swipe */
 .segment-card.dismissing {
-    animation: swipeOut 0.3s ease-out forwards;
+    animation: subtleSwipeOut 0.25s ease-out forwards;
 }
 
-@keyframes swipeOut {
+@keyframes subtleSwipeOut {
     0% {
         transform: translateX(0);
         opacity: 1;
         max-height: 500px;
         margin-bottom: 8px;
     }
-    50% {
-        transform: translateX(100%);
+    60% {
+        transform: translateX(30%);
         opacity: 0;
         max-height: 500px;
         margin-bottom: 8px;
     }
     100% {
-        transform: translateX(100%);
+        transform: translateX(30%);
         opacity: 0;
         max-height: 0;
         margin-bottom: 0;
@@ -442,7 +552,7 @@ body {
     opacity: 1;
 }
 
-/* NEW badge styling */
+/* NEW badge styling with pulse animation */
 .new-badge {
     display: inline-flex;
     align-items: center;
@@ -454,6 +564,20 @@ body {
     color: var(--vscode-button-foreground);
     border-radius: 3px;
     opacity: 1;
+    animation: badgePulse 2s ease-in-out infinite;
+    box-shadow: 0 0 0 0 var(--vscode-button-background);
+}
+
+@keyframes badgePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(var(--vscode-button-background), 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(var(--vscode-button-background), 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--vscode-button-background), 0);
+    }
 }
 
 .file-reference {
@@ -664,7 +788,15 @@ body {
     font-style: italic;
 }
 
+.context-display-wrapper {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
 .context-display {
+    flex: 1;
     padding: 8px 0 8px 12px;
     font-size: 13px;
     line-height: 1.6;
@@ -674,6 +806,73 @@ body {
     border-left: 3px solid var(--vscode-textLink-foreground);
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+.context-menu-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    color: var(--vscode-descriptionForeground);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.15s ease;
+}
+
+.context-menu-btn:hover {
+    background: var(--vscode-toolbar-hoverBackground);
+    opacity: 1;
+}
+
+.context-menu-btn .codicon {
+    font-size: 16px;
+}
+
+.context-menu {
+    position: absolute;
+    top: 28px;
+    right: 0;
+    background: var(--vscode-menu-background);
+    border: 1px solid var(--vscode-menu-border);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    min-width: 160px;
+    overflow: hidden;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: var(--vscode-menu-foreground);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.context-menu-item:hover {
+    background: var(--vscode-menu-selectionBackground);
+    color: var(--vscode-menu-selectionForeground);
+}
+
+.context-menu-item .codicon {
+    font-size: 14px;
+}
+
+.context-menu-item:not(:last-child) {
+    border-bottom: 1px solid var(--vscode-menu-separatorBackground);
 }
 
 .context-actions {
@@ -1028,7 +1227,9 @@ body {
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.25s ease;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0;
     border-top: 0px solid var(--vscode-panel-border);
     font-size: 12px;
@@ -1041,9 +1242,12 @@ body {
     opacity: 1;
     padding: 4px;
     border-top-width: 1px;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Icon Button Styles */
+/* Icon Button Styles with micro-interactions */
 .vk-icon-button {
     display: inline-flex;
     align-items: center;
@@ -1056,16 +1260,18 @@ body {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
 }
 
 .vk-icon-button:hover {
     background-color: var(--vscode-toolbar-hoverBackground);
+    transform: scale(1.1);
 }
 
 .vk-icon-button:active {
     background-color: var(--vscode-toolbar-activeBackground);
+    transform: scale(0.95);
 }
 
 .vk-icon-button .codicon {
@@ -1089,9 +1295,9 @@ body {
     background-color: rgba(255, 0, 0, 0.1);
 }
 
-/* Expand Button - Smooth chevron rotation */
+/* Expand Button - Smooth chevron rotation with bounce */
 .expand-btn .codicon {
-    transition: transform 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .segment-card.expanded .expand-btn .codicon {

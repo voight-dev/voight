@@ -41,11 +41,18 @@ export class DebugLogger {
     private _blocks: CodeBlock[] = [];
     private _lastChangeTime: number = 0;
     private _sessionStart: string;
-    private _outputPath: string;
-    private _solutionPath: string;
+    private _outputPath: string = '';
+    private _solutionPath: string = '';
+    private _shouldSave: boolean = false;
 
     constructor(workspaceRoot: string) {
         this._sessionStart = new Date().toISOString().replace(/[:.]/g, '-');
+        this._shouldSave = this._shouldSaveDebugData();
+
+        if (!this._shouldSave) {
+            Logger.debug('DebugLogger: Debug data will not be saved');
+            return;
+        }
 
         // Set up output directory
         const debugDir = path.join(workspaceRoot, '.voight-debug');
@@ -57,6 +64,11 @@ export class DebugLogger {
         this._solutionPath = path.join(debugDir, `solution_${this._sessionStart}.json`);
 
         Logger.debug(`DebugLogger: Will save data to ${debugDir}`);
+    }
+
+    private _shouldSaveDebugData(): boolean {
+        const config = vscode.workspace.getConfiguration('voight');
+        return config.get<boolean>('debug.saveDebugData', false);
     }
 
     /**
@@ -97,6 +109,10 @@ export class DebugLogger {
      * Record detected blocks
      */
     public recordBlocks(blocks: DetectedBlock[], fileName: string): void {
+        if (!this._shouldSave) {
+            return;
+        }
+
         blocks.forEach((block, idx) => {
             const codeBlock: CodeBlock = {
                 block_no: this._blocks.length + idx,
@@ -129,6 +145,10 @@ export class DebugLogger {
      * Save all collected data to files
      */
     public saveToFile(): void {
+        if (!this._shouldSave) {
+            return;
+        }
+
         try {
             // Save events
             const eventsJson = JSON.stringify(this._events, null, 2);

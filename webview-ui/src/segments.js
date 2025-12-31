@@ -67,7 +67,20 @@
             bulkRemoveBtn.style.display = segments && segments.length > 0 ? 'flex' : 'none';
         }
 
-        if (!segments || segments.length === 0) {
+        // Show skeleton loaders on initial load (when segments is undefined/null)
+        if (segments === undefined || segments === null) {
+            container.innerHTML = `
+                <div class="skeleton-loader">
+                    ${generateSkeletonCard()}
+                    ${generateSkeletonCard()}
+                    ${generateSkeletonCard()}
+                </div>
+            `;
+            countEl.textContent = 'Loading...';
+            return;
+        }
+
+        if (segments.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="codicon codicon-inbox"></div>
@@ -155,7 +168,22 @@
                     <!-- Context section (shows saved context or hidden input) -->
                     <div class="context-section ${segment.metadata?.context ? 'has-content' : ''}" data-segment-id="${segment.id}">
                         ${segment.metadata?.context ? `
-                            <div class="context-display">${escapeHtml(segment.metadata.context)}</div>
+                            <div class="context-display-wrapper">
+                                <div class="context-display">${escapeHtml(segment.metadata.context)}</div>
+                                <button class="context-menu-btn" title="Edit or remove context note">
+                                    <span class="codicon codicon-ellipsis"></span>
+                                </button>
+                                <div class="context-menu" style="display: none;">
+                                    <button class="context-menu-item edit-context-menu-btn">
+                                        <span class="codicon codicon-edit"></span>
+                                        <span>Edit</span>
+                                    </button>
+                                    <button class="context-menu-item remove-segment-btn">
+                                        <span class="codicon codicon-trash"></span>
+                                        <span>Remove Context</span>
+                                    </button>
+                                </div>
+                            </div>
                         ` : `
                             <div class="context-input-wrapper">
                                 <textarea class="context-input" placeholder="Add context about this code segment..."></textarea>
@@ -372,13 +400,63 @@
         if (card) {
             const contextSection = card.querySelector('.context-section');
             if (contextSection) {
-                // Add has-content class for styling
-                contextSection.classList.add('has-content');
+                if (context && context.trim().length > 0) {
+                    // Add has-content class for styling
+                    contextSection.classList.add('has-content');
 
-                // Replace content with saved context display
-                contextSection.innerHTML = `
-                    <div class="context-display">${escapeHtml(context)}</div>
-                `;
+                    // Replace content with saved context display and menu button
+                    contextSection.innerHTML = `
+                        <div class="context-display-wrapper">
+                            <div class="context-display">${escapeHtml(context)}</div>
+                            <button class="context-menu-btn" title="Edit or remove context note">
+                                <span class="codicon codicon-ellipsis"></span>
+                            </button>
+                            <div class="context-menu" style="display: none;">
+                                <button class="context-menu-item edit-context-menu-btn">
+                                    <span class="codicon codicon-edit"></span>
+                                    <span>Edit</span>
+                                </button>
+                                <button class="context-menu-item remove-segment-btn">
+                                    <span class="codicon codicon-trash"></span>
+                                    <span>Remove Context</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Add context indicator button to header if not present
+                    const headerActions = card.querySelector('.segment-header-actions');
+                    if (headerActions && !headerActions.querySelector('.context-indicator-btn')) {
+                        // Insert context indicator before star button
+                        const starBtn = headerActions.querySelector('.star-btn');
+                        if (starBtn) {
+                            const contextIndicator = document.createElement('button');
+                            contextIndicator.className = 'vk-icon-button context-indicator-btn';
+                            contextIndicator.title = 'Has context note';
+                            contextIndicator.disabled = true;
+                            contextIndicator.innerHTML = '<span class="codicon codicon-note"></span>';
+                            headerActions.insertBefore(contextIndicator, starBtn);
+                        }
+                    }
+                } else {
+                    // Empty context - remove indicator and reset section
+                    contextSection.classList.remove('has-content');
+                    contextSection.innerHTML = `
+                        <div class="context-input-wrapper">
+                            <textarea class="context-input" placeholder="Add context about this code segment..."></textarea>
+                            <div class="context-actions">
+                                <button class="vk-button vk-button--primary save-context-btn">Save</button>
+                                <button class="vk-button cancel-context-btn">Cancel</button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Remove context indicator button from header
+                    const contextIndicator = card.querySelector('.context-indicator-btn');
+                    if (contextIndicator) {
+                        contextIndicator.remove();
+                    }
+                }
             }
         }
     }
@@ -398,10 +476,10 @@
         const card = document.querySelector(`.segment-card[data-segment-id="${segmentId}"]`);
         if (!card) return;
 
-        // Add dismissing class to trigger animation
+        // Subtle dismiss animation - just fade and swipe
         card.classList.add('dismissing');
 
-        // Wait for animation to complete before removing from DOM and notifying backend
+        // Wait for animation to complete (250ms)
         setTimeout(() => {
             // Remove from DOM
             card.remove();
@@ -433,6 +511,60 @@
 
                 if (nextSegment) {
                     // Tell backend to navigate to this segment
+                    vscode.postMessage({
+                        command: 'goToSegment',
+                        segmentId: nextSegment.id,
+                        startLine: nextSegment.startLine,
+                        endLine: nextSegment.endLine,
+                        filePath: nextSegment.filePath
+                    });
+                }
+            }
+        }, 250); // Subtle swipe animation duration
+    }
+
+    function removeSegment(segmentId) {
+        // Force remove a segment completely, regardless of context or star status
+        const currentIndex = displayedSegments.findIndex(s => s.id === segmentId);
+
+        // Find the card element
+        const card = document.querySelector(`.segment-card[data-segment-id="${segmentId}"]`);
+        if (!card) {
+            return;
+        }
+
+        // Add dismissing class to trigger animation
+        card.classList.add('dismissing');
+
+        // Wait for animation to complete before removing from DOM and notifying backend
+        setTimeout(() => {
+            // Remove from DOM
+            card.remove();
+
+            // Remove from both arrays
+            segments = segments.filter(s => s.id !== segmentId);
+            displayedSegments = displayedSegments.filter(s => s.id !== segmentId);
+
+            // Update segment count
+            const countEl = document.getElementById('segment-count');
+            if (countEl) {
+                countEl.textContent = segments.length === 0
+                    ? 'No segments'
+                    : `${segments.length} segment${segments.length !== 1 ? 's' : ''}`;
+            }
+
+            // Notify backend to force remove
+            vscode.postMessage({
+                command: 'removeSegment',
+                segmentId
+            });
+
+            // Auto-advance: Navigate to next segment in DISPLAY ORDER
+            if (displayedSegments.length > 0) {
+                const nextIndex = currentIndex >= displayedSegments.length ? 0 : currentIndex;
+                const nextSegment = displayedSegments[nextIndex];
+
+                if (nextSegment) {
                     vscode.postMessage({
                         command: 'goToSegment',
                         segmentId: nextSegment.id,
@@ -653,6 +785,26 @@
         return div.innerHTML;
     }
 
+    function generateSkeletonCard() {
+        return `
+            <div class="skeleton-card">
+                <div class="skeleton-header">
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-actions">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-icon"></div>
+                    </div>
+                </div>
+                <div class="skeleton-badges">
+                    <div class="skeleton-badge"></div>
+                    <div class="skeleton-badge"></div>
+                    <div class="skeleton-badge"></div>
+                </div>
+            </div>
+        `;
+    }
+
     /**
      * Render markdown content using marked.js library
      */
@@ -767,6 +919,14 @@
     // Event delegation for all clicks
     document.addEventListener('click', function(e) {
         const target = e.target;
+
+        // Close any open context menus when clicking outside
+        if (!target.closest('.context-menu-btn') && !target.closest('.context-menu')) {
+            const openMenus = document.querySelectorAll('.context-menu');
+            openMenus.forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
 
         // Handle sort buttons
         const sortBtn = target.closest('.sort-button');
@@ -924,10 +1084,25 @@
                 const segment = segments.find(s => s.id === segmentId);
 
                 if (segment && segment.metadata?.context) {
-                    // Restore saved context display
+                    // Restore saved context display with menu button
                     contextSection.classList.add('has-content');
                     contextSection.innerHTML = `
-                        <div class="context-display">${escapeHtml(segment.metadata.context)}</div>
+                        <div class="context-display-wrapper">
+                            <div class="context-display">${escapeHtml(segment.metadata.context)}</div>
+                            <button class="context-menu-btn" title="Edit or remove context note">
+                                <span class="codicon codicon-ellipsis"></span>
+                            </button>
+                            <div class="context-menu" style="display: none;">
+                                <button class="context-menu-item edit-context-menu-btn">
+                                    <span class="codicon codicon-edit"></span>
+                                    <span>Edit</span>
+                                </button>
+                                <button class="context-menu-item remove-segment-btn">
+                                    <span class="codicon codicon-trash"></span>
+                                    <span>Remove Context</span>
+                                </button>
+                            </div>
+                        </div>
                     `;
                 } else {
                     // No existing context, hide the section completely
@@ -938,6 +1113,103 @@
                         const textarea = wrapper.querySelector('.context-input');
                         if (textarea) {
                             textarea.value = '';
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        // Handle Context Menu Button
+        const contextMenuBtn = target.closest('.context-menu-btn');
+        if (contextMenuBtn) {
+            e.preventDefault();
+            const menu = contextMenuBtn.nextElementSibling;
+            if (menu && menu.classList.contains('context-menu')) {
+                const isVisible = menu.style.display !== 'none';
+                menu.style.display = isVisible ? 'none' : 'block';
+            }
+            return;
+        }
+
+        // Handle Edit Context Menu Item
+        const editContextMenuBtn = target.closest('.edit-context-menu-btn');
+        if (editContextMenuBtn) {
+            const contextSection = editContextMenuBtn.closest('.context-section');
+            if (contextSection) {
+                e.preventDefault();
+                const segmentId = contextSection.dataset.segmentId;
+                const segment = segments.find(s => s.id === segmentId);
+
+                // Hide the menu
+                const menu = contextSection.querySelector('.context-menu');
+                if (menu) {
+                    menu.style.display = 'none';
+                }
+
+                // Get existing context text
+                const existingContext = segment?.metadata?.context || '';
+
+                // Show edit mode
+                contextSection.classList.remove('has-content');
+                contextSection.innerHTML = `
+                    <div class="context-input-wrapper visible">
+                        <textarea class="context-input" placeholder="Add context about this code segment...">${escapeHtml(existingContext)}</textarea>
+                        <div class="context-actions">
+                            <button class="vk-button cancel-context-btn">Cancel</button>
+                            <button class="vk-button vk-button--primary save-context-btn">Save</button>
+                        </div>
+                    </div>
+                `;
+                const textarea = contextSection.querySelector('.context-input');
+                if (textarea) {
+                    setTimeout(() => textarea.focus(), 100);
+                }
+            }
+            return;
+        }
+
+        // Handle Remove Context Menu Item
+        const removeSegmentBtn = target.closest('.remove-segment-btn');
+        if (removeSegmentBtn) {
+            const contextSection = removeSegmentBtn.closest('.context-section');
+            if (contextSection) {
+                const segmentId = contextSection.dataset.segmentId;
+                if (segmentId) {
+                    e.preventDefault();
+                    // Hide the menu
+                    const menu = contextSection.querySelector('.context-menu');
+                    if (menu) {
+                        menu.style.display = 'none';
+                    }
+
+                    // Remove only the context note, not the entire segment
+                    const segment = segments.find(s => s.id === segmentId);
+                    if (segment && segment.metadata) {
+                        segment.metadata.context = '';
+                    }
+
+                    // Save empty context to backend
+                    saveContext(segmentId, '');
+
+                    // Update UI to hide context section
+                    contextSection.classList.remove('has-content');
+                    contextSection.innerHTML = `
+                        <div class="context-input-wrapper">
+                            <textarea class="context-input" placeholder="Add context about this code segment..."></textarea>
+                            <div class="context-actions">
+                                <button class="vk-button vk-button--primary save-context-btn">Save</button>
+                                <button class="vk-button cancel-context-btn">Cancel</button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Remove context indicator button from header
+                    const card = document.querySelector(`.segment-card[data-segment-id="${segmentId}"]`);
+                    if (card) {
+                        const contextIndicator = card.querySelector('.context-indicator-btn');
+                        if (contextIndicator) {
+                            contextIndicator.remove();
                         }
                     }
                 }

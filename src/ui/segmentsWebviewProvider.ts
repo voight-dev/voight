@@ -9,6 +9,7 @@ import { HighlightSegment, SegmentState } from './highlighter';
 import { ContextNotesManager } from './contextNotes';
 import { AIProviderFactory } from '../ai/providerFactory';
 import { Logger } from '../utils/logger';
+import { FileRegistry } from '../tracking/fileRegistry';
 
 export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'voight.segmentsView';
@@ -18,7 +19,8 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private readonly _blockManager: BlockManager,
-        private readonly _contextNotesManager: ContextNotesManager
+        private readonly _contextNotesManager: ContextNotesManager,
+        private readonly _fileRegistry: FileRegistry
     ) {
         // Listen for block changes and refresh view
         if (_blockManager.onBlockRegistered) {
@@ -131,6 +133,16 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
                             }
                         }
                         // Update badge in real-time after dismissal
+                        this._updateBadge();
+                        // Don't call _updateSegments() here - frontend handles UI removal
+                    }
+                    break;
+
+                case 'removeSegment':
+                    // Force remove segment completely, regardless of star or context
+                    if (message.segmentId) {
+                        this._blockManager.remove(message.segmentId);
+                        // Update badge in real-time after removal
                         this._updateBadge();
                         // Don't call _updateSegments() here - frontend handles UI removal
                     }
@@ -260,7 +272,9 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             return;
         }
 
-        const blocks = this._blockManager.getAllBlocks();
+        // Filter out segments from deleted files
+        const allBlocks = this._blockManager.getAllBlocks();
+        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));
 
         // Count segments that haven't been interacted with yet
         // A segment is "seen" if ANY of these conditions are true:
@@ -329,7 +343,10 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
         const filePath = activeEditor.document.fileName;
 
         // Find which segment contains the cursor
-        const blocks = this._blockManager.getAllBlocks();
+        // Filter out segments from deleted files
+        const allBlocks = this._blockManager.getAllBlocks();
+        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));
+
         const currentSegment = blocks.find(block =>
             block.filePath === filePath &&
             cursorLine >= block.startLine &&
@@ -351,10 +368,13 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             return;
         }
 
+        // Filter out segments from deleted files before grouping
+        const existingBlocks = blocks.filter(block => this._fileRegistry.isKnown(block.filePath));
+
         // Group blocks by file and count segments
         const fileMap = new Map<string, { count: number; blocks: HighlightSegment[] }>();
 
-        blocks.forEach(block => {
+        existingBlocks.forEach(block => {
             if (!fileMap.has(block.filePath)) {
                 fileMap.set(block.filePath, { count: 0, blocks: [] });
             }
@@ -392,10 +412,18 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
         const activeEditor = vscode.window.activeTextEditor;
         const activeFilePath = activeEditor?.document.fileName;
 
-        const blocks = this._blockManager.getAllBlocks();
+        // Filter out segments from deleted files
+        const allBlocks = this._blockManager.getAllBlocks();
+        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));
+
+        const filteredCount = allBlocks.length - blocks.length;
+        if (filteredCount > 0) {
+            Logger.debug(`[SegmentsWebviewProvider] Filtered out ${filteredCount} segments from deleted files`);
+        }
+
         Logger.debug(`[SegmentsWebviewProvider] Active file: ${activeFilePath || 'none'}`);
         Logger.debug(`[SegmentsWebviewProvider] Last viewed file: ${this._lastViewedFilePath || 'none'}`);
-        Logger.debug(`[SegmentsWebviewProvider] Total blocks: ${blocks.length}`);
+        Logger.debug(`[SegmentsWebviewProvider] Total blocks (after filtering): ${blocks.length}`);
 
         // Log all block file paths for debugging
         blocks.forEach(b => {

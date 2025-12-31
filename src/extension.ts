@@ -12,12 +12,18 @@ import { ContextNotesManager } from './ui/contextNotes';
 import { SegmentsWebviewProvider } from './ui/segmentsWebviewProvider';
 import { VscodeSegmentRepository } from './storage/VscodeSegmentRepository';
 import { FileTrackingService } from './tracking/fileTracker';
+import { FileRegistry } from './tracking/fileRegistry';
+import { ShadowMetadataManager } from './tracking/shadowMetadataManager';
+import { ShadowGarbageCollector } from './tracking/shadowGarbageCollector';
 
 let coordinator: DetectionCoordinator;
 let blockManager: BlockManager;
 let contextNotesManager: ContextNotesManager;
 let debugLogger: DebugLogger | undefined;
 let fileTrackingService: FileTrackingService;
+let fileRegistry: FileRegistry;
+let shadowMetadataManager: ShadowMetadataManager;
+let shadowGarbageCollector: ShadowGarbageCollector;
 
 export async function activate(context: vscode.ExtensionContext) {
 	// Read debug mode configuration
@@ -26,7 +32,36 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Configure logger with debug mode
 	Logger.configure('Voight', debugMode);
-	Logger.info(`Extension activated (debug mode: ${debugMode ? 'enabled' : 'disabled'})`);
+
+	// Get extension version and running mode
+	const extension = vscode.extensions.getExtension('undefined_publisher.voight');
+	const version = extension?.packageJSON?.version || 'unknown';
+
+	// Determine if we're running in development/debug mode (F5) or packaged mode
+	const extensionMode = context.extensionMode;
+	let modeString = 'Unknown';
+
+	switch (extensionMode) {
+		case vscode.ExtensionMode.Production:
+			modeString = 'Production (Packaged VSIX)';
+			break;
+		case vscode.ExtensionMode.Development:
+			modeString = 'Development (F5 Debug)';
+			break;
+		case vscode.ExtensionMode.Test:
+			modeString = 'Test Mode';
+			break;
+	}
+
+	// Build information (injected by esbuild at compile time)
+	const buildTimestamp = typeof __BUILD_TIMESTAMP__ !== 'undefined' ? __BUILD_TIMESTAMP__ : 'unknown';
+	const buildMode = typeof __BUILD_MODE__ !== 'undefined' ? __BUILD_MODE__ : 'unknown';
+
+	Logger.info(`=== Voight v${version} ===`);
+	Logger.info(`Extension mode: ${modeString}`);
+	Logger.info(`Build: ${buildMode} @ ${buildTimestamp}`);
+	Logger.info(`Debug logging: ${debugMode ? 'ENABLED' : 'DISABLED'}`);
+	Logger.info(`Extension activated`);
 	Logger.show();
 
 	// Register health check command
@@ -57,6 +92,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		Logger.debug(`File edited: ${vscode.workspace.asRelativePath(event.filePath)} (edit #${event.editCount}, ${event.linesChanged} lines)`);
 	});
 
+	// Initialize file registry to track existing files
+	fileRegistry = new FileRegistry();
+	await fileRegistry.initialize(workspaceRoot);
+	Logger.info(`File registry initialized with ${fileRegistry.getCount()} files`);
+
 	// Initialize UI layer
 	const highlighter = createDefaultHighlighter();
 	blockManager = new BlockManager(highlighter, segmentRepository, fileTrackingService);
@@ -67,7 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	contextNotesManager.setBlockManager(blockManager);
 
 	// Register segments webview for Activity Bar sidebar
-	const segmentsWebviewProvider = new SegmentsWebviewProvider(context.extensionUri, blockManager, contextNotesManager);
+	const segmentsWebviewProvider = new SegmentsWebviewProvider(context.extensionUri, blockManager, contextNotesManager, fileRegistry);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			SegmentsWebviewProvider.viewType,
@@ -87,8 +127,24 @@ export async function activate(context: vscode.ExtensionContext) {
 		debugLogger = undefined;
 	}
 
-	// Initialize detection coordinator with UI and optional debug integration
-	coordinator = new DetectionCoordinator(blockManager, debugLogger);
+	// Initialize shadow metadata manager with workspace state
+	shadowMetadataManager = new ShadowMetadataManager(context.workspaceState);
+	await shadowMetadataManager.loadFromWorkspace();
+	Logger.info('Shadow metadata manager initialized');
+
+	// Initialize detection coordinator with file registry, UI and optional debug integration
+	coordinator = new DetectionCoordinator(fileRegistry, blockManager, debugLogger);
+
+	// Connect metadata manager to change detector
+	coordinator.getChangeDetector().setMetadataManager(shadowMetadataManager);
+
+	// Initialize garbage collector
+	shadowGarbageCollector = new ShadowGarbageCollector(
+		coordinator.getChangeDetector(),
+		shadowMetadataManager
+	);
+	shadowGarbageCollector.start();
+	Logger.info('Shadow garbage collector started');
 
 	// Initialize tracking for all currently open documents
 	vscode.workspace.textDocuments.forEach(doc => {
@@ -103,6 +159,63 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Set up document change listener - analyze all changes
 	const documentChangeListener = vscode.workspace.onDidChangeTextDocument((event) => {
 		coordinator.analyzeEvent(event);
+	});
+
+	// Watch for files created and deleted on disk (by AI tools, external processes, etc.)
+	const fileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*');
+
+	const fileCreateListener = fileSystemWatcher.onDidCreate(async (uri) => {
+		if (uri.scheme !== 'file') {
+			return;
+		}
+
+		Logger.info(`File system: New file created on disk - ${uri.fsPath}`);
+
+		// Check if file is already known
+		if (!fileRegistry.isKnown(uri.fsPath)) {
+			Logger.info(`File system: This is a NEW file - marking for tracking`);
+
+			// Wait a brief moment to see if user is actively editing this file
+			await new Promise(resolve => setTimeout(resolve, 500));
+
+			// Check if there's an active editor for this file
+			const activeEditor = vscode.window.activeTextEditor;
+			const isActivelyEditing = activeEditor?.document.uri.fsPath === uri.fsPath;
+
+			if (isActivelyEditing) {
+				Logger.info(`File system: User is actively editing - will use normal paste detection`);
+				// Don't register yet - let initializeDocument handle it
+				return;
+			}
+
+			// File was created by AI/external tool and not actively being edited
+			// Mark it as a "pending new file" that should be fully tracked when opened
+			Logger.info(`File system: Marking as AI-generated file (will process when opened)`);
+			// Don't register it - this keeps it "unknown" so initializeDocument will handle it specially
+		}
+	});
+
+	const fileDeleteListener = fileSystemWatcher.onDidDelete((uri) => {
+		if (uri.scheme !== 'file') {
+			return;
+		}
+
+		const filePath = uri.fsPath;
+		Logger.info(`File system: File deleted - ${filePath}`);
+
+		// Remove from file registry
+		fileRegistry.unregister(filePath);
+
+		// Remove all segments for this file
+		blockManager.removeSegmentsForFile(filePath);
+
+		// Clear shadow state for this file
+		coordinator.clearFile(filePath);
+
+		// Remove shadow metadata
+		shadowMetadataManager.removeMetadata(filePath);
+
+		Logger.info(`File system: Cleaned up tracking data for deleted file`);
 	});
 
 	// Show paste detection stats command
@@ -313,10 +426,65 @@ Last edited: ${new Date(fileData.lastEditedAt).toLocaleString()}`;
 		}
 	});
 
+	// Show shadow GC statistics
+	const showGCStatsCommand = vscode.commands.registerCommand('voight.showGCStats', () => {
+		const gcStats = shadowMetadataManager.getGCStats();
+		const analytics = shadowMetadataManager.getAnalyticsSummary();
+		const changeDetector = coordinator.getChangeDetector();
+		const gcConfig = shadowGarbageCollector.getConfig();
+
+		const message = `Shadow Garbage Collector:
+Status: ${gcConfig.isRunning ? 'Running' : 'Stopped'}
+GC Interval: ${gcConfig.intervalMinutes} minutes
+Retention: ${gcConfig.retentionMinutes} minutes
+
+Current State:
+Active shadows: ${changeDetector.getShadowCount()}
+Total memory: ${formatBytes(changeDetector.getTotalMemoryUsage())}
+
+Metadata:
+Total files tracked: ${analytics.totalFiles}
+Active files: ${analytics.activeFiles}
+Removed files: ${analytics.removedFiles}
+Total lifecycles: ${analytics.totalLifecycles}
+
+GC Stats:
+Total runs: ${gcStats.totalRuns}
+Total shadows removed: ${gcStats.totalShadowsRemoved}
+Total memory freed: ${formatBytes(gcStats.totalMemoryFreed)}
+Last run: ${gcStats.lastRunAt > 0 ? new Date(gcStats.lastRunAt).toLocaleString() : 'Never'}`;
+
+		vscode.window.showInformationMessage(message);
+	});
+
+	// Manually trigger garbage collection
+	const runGCCommand = vscode.commands.registerCommand('voight.runGC', async () => {
+		vscode.window.showInformationMessage('Running garbage collection...');
+		await shadowGarbageCollector.collect();
+		const gcStats = shadowMetadataManager.getGCStats();
+		vscode.window.showInformationMessage(
+			`GC complete: removed ${gcStats.lastRunStats.shadowsRemoved} shadows, freed ${formatBytes(gcStats.lastRunStats.memoryFreed)}`
+		);
+	});
+
+	// Helper function for formatting bytes
+	function formatBytes(bytes: number): string {
+		if (bytes < 1024) {
+			return `${bytes}B`;
+		}
+		if (bytes < 1024 * 1024) {
+			return `${(bytes / 1024).toFixed(1)}KB`;
+		}
+		return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+	}
+
 	context.subscriptions.push(
 		healthCheckCommand,
 		documentOpenListener,
 		documentChangeListener,
+		fileSystemWatcher,
+		fileCreateListener,
+		fileDeleteListener,
 		showStatsCommand,
 		showBlockStatsCommand,
 		clearBlocksCommand,
@@ -327,6 +495,8 @@ Last edited: ${new Date(fileData.lastEditedAt).toLocaleString()}`;
 		exportFileRankingsCommand,
 		getCurrentFileTrackingCommand,
 		clearFileTrackingCommand,
+		showGCStatsCommand,
+		runGCCommand,
 		fileEditListener
 	);
 
@@ -334,13 +504,27 @@ Last edited: ${new Date(fileData.lastEditedAt).toLocaleString()}`;
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {
-	if (debugLogger) {
-		Logger.info('Extension deactivating - saving debug data...');
-		coordinator.saveDebugData();
-	} else {
-		Logger.info('Extension deactivating');
+export async function deactivate() {
+	Logger.info('Extension deactivating...');
+
+	// Stop garbage collector
+	if (shadowGarbageCollector) {
+		shadowGarbageCollector.stop();
+		Logger.info('Garbage collector stopped');
 	}
 
+	// Save metadata
+	if (shadowMetadataManager) {
+		await shadowMetadataManager.saveToWorkspace();
+		Logger.info('Shadow metadata saved');
+	}
+
+	// Save debug data if enabled
+	if (debugLogger) {
+		Logger.info('Saving debug data...');
+		coordinator.saveDebugData();
+	}
+
+	Logger.info('Extension deactivated');
 	Logger.dispose();
 }

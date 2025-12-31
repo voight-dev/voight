@@ -68,14 +68,17 @@ export class FilePatternMatcher {
             }
         }
 
+        // Exclude dotfiles and dot directories (files/folders starting with .)
+        const pathParts = relativePath.split(/[/\\]/);
+        const hasDotFile = pathParts.some(part => part.startsWith('.') && part !== '.');
+        if (hasDotFile) {
+            Logger.debug(`[FilePatternMatcher] File excluded (dotfile/dotfolder): ${filePath}`);
+            return true;
+        }
+
         // Check glob patterns
         for (const pattern of this.globPatterns) {
-            const matcher = new vscode.RelativePattern(
-                workspaceFolder?.uri.fsPath || '',
-                pattern
-            );
-
-            // Use VS Code's built-in glob matching
+            // Use custom glob matching
             if (this.matchGlob(relativePath, pattern)) {
                 Logger.debug(`[FilePatternMatcher] File excluded by glob pattern "${pattern}": ${filePath}`);
                 return true;

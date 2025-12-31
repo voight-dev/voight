@@ -5,6 +5,7 @@ import { ComplexityScorer } from './complexity/scorer';
 import { ComplexityAnalyzer } from './complexity/analyzer';
 import { FunctionInfo, Language } from './complexity/types';
 import { FunctionBoundaryDetector } from './complexity/functionBoundaryDetector';
+import { ShadowMetadataManager } from '../tracking/shadowMetadataManager';
 
 /**
  * Represents a document snapshot at a point in time
@@ -51,6 +52,14 @@ export interface DetectedBlock {
  */
 export class ChangeDetector {
     private _shadowDocuments: Map<string, DocumentSnapshot> = new Map();
+    private _metadataManager?: ShadowMetadataManager;
+
+    /**
+     * Set metadata manager for tracking shadow state lifecycle
+     */
+    public setMetadataManager(manager: ShadowMetadataManager): void {
+        this._metadataManager = manager;
+    }
 
     /**
      * Initialize tracking for a document
@@ -63,7 +72,34 @@ export class ChangeDetector {
             // Initialize shadow state to current document state
             // This prevents treating existing file content as "new" when opened
             this._updateShadow(document);
+
+            // Create metadata for this shadow
+            if (this._metadataManager) {
+                const shadowSize = this._calculateShadowSize(document);
+                this._metadataManager.createMetadata(filePath, shadowSize);
+            }
+
             Logger.debug(`ChangeDetector: Initialized shadow state for ${filePath}`);
+        } else {
+            Logger.debug(`ChangeDetector: File already tracked ${filePath}`);
+        }
+    }
+
+    /**
+     * Initialize tracking for a newly created file
+     * Sets shadow state to EMPTY so all content is detected as AI-generated
+     */
+    public initializeNewFile(filePath: string): void {
+        if (!this._shadowDocuments.has(filePath)) {
+            // Initialize shadow state as empty document
+            // This ensures all content in the new file is detected as AI-generated
+            const emptySnapshot: DocumentSnapshot = {
+                lines: [],
+                version: 0,
+                timestamp: Date.now()
+            };
+            this._shadowDocuments.set(filePath, emptySnapshot);
+            Logger.info(`ChangeDetector: Initialized NEW FILE with empty shadow state: ${filePath}`);
         } else {
             Logger.debug(`ChangeDetector: File already tracked ${filePath}`);
         }
@@ -104,6 +140,12 @@ export class ChangeDetector {
 
         Logger.debug(`ChangeDetector: Detected ${changedLines.size} changed lines`);
 
+        // Record edit in metadata
+        if (this._metadataManager) {
+            const shadowSize = this._calculateShadowSize(document);
+            this._metadataManager.recordEdit(filePath, shadowSize);
+        }
+
         this._updateShadow(document);
 
         return this._detectBlocksFromChangedLines(changedLines, document);
@@ -117,10 +159,60 @@ export class ChangeDetector {
     }
 
     /**
+     * Clear shadow state for a specific file
+     * Used when a file is deleted
+     */
+    public clearFile(filePath: string): void {
+        this._shadowDocuments.delete(filePath);
+        Logger.debug(`ChangeDetector: Cleared shadow state for file: ${filePath}`);
+    }
+
+    /**
      * Clear all shadow states
      */
     public clearAll(): void {
         this._shadowDocuments.clear();
+    }
+
+    /**
+     * Remove shadow state for garbage collection
+     * Returns the size of the removed shadow in bytes
+     */
+    public removeShadow(filePath: string): number {
+        const snapshot = this._shadowDocuments.get(filePath);
+        if (!snapshot) {
+            return 0;
+        }
+
+        const size = this._calculateSnapshotSize(snapshot);
+        this._shadowDocuments.delete(filePath);
+
+        return size;
+    }
+
+    /**
+     * Check if shadow exists for a file
+     */
+    public hasShadow(filePath: string): boolean {
+        return this._shadowDocuments.has(filePath);
+    }
+
+    /**
+     * Get total memory usage of all shadows
+     */
+    public getTotalMemoryUsage(): number {
+        let total = 0;
+        for (const snapshot of this._shadowDocuments.values()) {
+            total += this._calculateSnapshotSize(snapshot);
+        }
+        return total;
+    }
+
+    /**
+     * Get count of active shadows
+     */
+    public getShadowCount(): number {
+        return this._shadowDocuments.size;
     }
 
     /**
@@ -652,5 +744,31 @@ export class ChangeDetector {
             /^private\s+(static\s+)?(\w+\s+)?\w+\s*\(/,
         ];
         return patterns.some(pattern => pattern.test(line));
+    }
+
+    /**
+     * Calculate size of a document in bytes (for memory tracking)
+     */
+    private _calculateShadowSize(document: vscode.TextDocument): number {
+        const snapshot = this._captureDocumentState(document);
+        return this._calculateSnapshotSize(snapshot);
+    }
+
+    /**
+     * Calculate size of a snapshot in bytes
+     * Estimates memory usage of the snapshot object
+     */
+    private _calculateSnapshotSize(snapshot: DocumentSnapshot): number {
+        // Calculate size of lines array
+        let size = 0;
+        for (const line of snapshot.lines) {
+            // JavaScript strings are UTF-16, so 2 bytes per character
+            size += line.length * 2;
+        }
+        // Add overhead for array structure (approximate)
+        size += snapshot.lines.length * 8;
+        // Add size of other fields (version, timestamp)
+        size += 16;
+        return size;
     }
 }

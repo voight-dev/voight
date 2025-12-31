@@ -24,6 +24,14 @@ const esbuildProblemMatcherPlugin = {
 };
 
 async function main() {
+	// Generate build timestamp
+	const buildTimestamp = new Date().toISOString();
+	const buildMode = production ? 'production' : 'development';
+
+	console.log(`Building Voight extension...`);
+	console.log(`  Mode: ${buildMode}`);
+	console.log(`  Timestamp: ${buildTimestamp}`);
+
 	// Build extension
 	const extCtx = await esbuild.context({
 		entryPoints: [
@@ -41,6 +49,10 @@ async function main() {
 		plugins: [
 			esbuildProblemMatcherPlugin,
 		],
+		define: {
+			'__BUILD_TIMESTAMP__': JSON.stringify(buildTimestamp),
+			'__BUILD_MODE__': JSON.stringify(buildMode),
+		},
 	});
 
 	// Build webview JavaScript

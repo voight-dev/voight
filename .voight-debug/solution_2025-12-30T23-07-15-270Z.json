@@ -1,0 +1,233 @@
+{
+  "blocks": [
+    {
+      "block_no": 0,
+      "line_number_start": 196,
+      "line_number_end": 197,
+      "code": "     * NEW APPROACH: Don't create segments - just track for future edits\n     * User should read entire file manually",
+      "timestamp": "2025-12-31T00:59:51.035Z",
+      "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 227,
+      "line_number_end": 238,
+      "code": "        // 1. Register as known so future edits are tracked normally\n        this._fileRegistry.register(filePath);\n\n        // 2. Initialize shadow state with CURRENT content as baseline\n        //    Future edits will diff against this baseline\n        this._changeDetector.initializeDocument(document);\n        Logger.info(`Shadow state initialized for new file (baseline = current content)`);\n\n        // 3. DO NOT create segments - let user read entire file\n        //    No segments, no UI registration, just tracking setup\n        Logger.info(`No segments created for new file - user should review entire file manually`);\n        Logger.info(`Future edits to this file will be detected normally`);",
+      "timestamp": "2025-12-31T00:59:51.035Z",
+      "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts"
+    },
+    {
+      "block_no": 2,
+      "line_number_start": 239,
+      "line_number_end": 252,
+      "code": "\n        // 4. Notify user with action to open file\n        const fileName = filePath.split('/').pop() || filePath;\n        const lineCount = document.lineCount;\n        vscode.window.showInformationMessage(\n            `New file created: ${fileName} (${lineCount} line${lineCount !== 1 ? 's' : ''}) - Please review manually`,\n            'Open File',\n            'Dismiss'\n        ).then(selection => {\n            if (selection === 'Open File') {\n                vscode.window.showTextDocument(document, { preview: false });\n            }\n        });\n",
+      "timestamp": "2025-12-31T01:15:04.172Z",
+      "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts"
+    },
+    {
+      "block_no": 3,
+      "line_number_start": 7,
+      "line_number_end": 7,
+      "code": "import { ShadowMetadataManager } from '../tracking/shadowMetadataManager';",
+      "timestamp": "2025-12-31T02:07:38.290Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 4,
+      "line_number_start": 54,
+      "line_number_end": 54,
+      "code": "    private _metadataManager?: ShadowMetadataManager;",
+      "timestamp": "2025-12-31T02:07:45.108Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 5,
+      "line_number_start": 57,
+      "line_number_end": 63,
+      "code": "     * Set metadata manager for tracking shadow state lifecycle\n     */\n    public setMetadataManager(manager: ShadowMetadataManager): void {\n        this._metadataManager = manager;\n    }\n\n    /**",
+      "timestamp": "2025-12-31T02:07:56.255Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 7,
+      "line_number_start": 74,
+      "line_number_end": 80,
+      "code": "\n            // Create metadata for this shadow\n            if (this._metadataManager) {\n                const shadowSize = this._calculateShadowSize(document);\n                this._metadataManager.createMetadata(filePath, shadowSize);\n            }\n",
+      "timestamp": "2025-12-31T02:07:56.255Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 7,
+      "line_number_start": 142,
+      "line_number_end": 147,
+      "code": "        // Record edit in metadata\n        if (this._metadataManager) {\n            const shadowSize = this._calculateShadowSize(document);\n            this._metadataManager.recordEdit(filePath, shadowSize);\n        }\n",
+      "timestamp": "2025-12-31T02:08:03.620Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 8,
+      "line_number_start": 177,
+      "line_number_end": 217,
+      "code": "     * Remove shadow state for garbage collection\n     * Returns the size of the removed shadow in bytes\n     */\n    public removeShadow(filePath: string): number {\n        const snapshot = this._shadowDocuments.get(filePath);\n        if (!snapshot) {\n            return 0;\n        }\n\n        const size = this._calculateSnapshotSize(snapshot);\n        this._shadowDocuments.delete(filePath);\n\n        return size;\n    }\n\n    /**\n     * Check if shadow exists for a file\n     */\n    public hasShadow(filePath: string): boolean {\n        return this._shadowDocuments.has(filePath);\n    }\n\n    /**\n     * Get total memory usage of all shadows\n     */\n    public getTotalMemoryUsage(): number {\n        let total = 0;\n        for (const snapshot of this._shadowDocuments.values()) {\n            total += this._calculateSnapshotSize(snapshot);\n        }\n        return total;\n    }\n\n    /**\n     * Get count of active shadows\n     */\n    public getShadowCount(): number {\n        return this._shadowDocuments.size;\n    }\n\n    /**",
+      "timestamp": "2025-12-31T02:08:13.660Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 9,
+      "line_number_start": 747,
+      "line_number_end": 772,
+      "code": "\n    /**\n     * Calculate size of a document in bytes (for memory tracking)\n     */\n    private _calculateShadowSize(document: vscode.TextDocument): number {\n        const snapshot = this._captureDocumentState(document);\n        return this._calculateSnapshotSize(snapshot);\n    }\n\n    /**\n     * Calculate size of a snapshot in bytes\n     * Estimates memory usage of the snapshot object\n     */\n    private _calculateSnapshotSize(snapshot: DocumentSnapshot): number {\n        // Calculate size of lines array\n        let size = 0;\n        for (const line of snapshot.lines) {\n            // JavaScript strings are UTF-16, so 2 bytes per character\n            size += line.length * 2;\n        }\n        // Add overhead for array structure (approximate)\n        size += snapshot.lines.length * 8;\n        // Add size of other fields (version, timestamp)\n        size += 16;\n        return size;\n    }",
+      "timestamp": "2025-12-31T02:08:27.856Z",
+      "file": "/Users/swarit-dev/voight/src/detection/changeDetector.ts"
+    },
+    {
+      "block_no": 10,
+      "line_number_start": 15,
+      "line_number_end": 16,
+      "code": "import { ShadowMetadataManager } from './tracking/shadowMetadataManager';\nimport { ShadowGarbageCollector } from './tracking/shadowGarbageCollector';",
+      "timestamp": "2025-12-31T02:09:24.618Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 12,
+      "line_number_start": 24,
+      "line_number_end": 25,
+      "code": "let shadowMetadataManager: ShadowMetadataManager;\nlet shadowGarbageCollector: ShadowGarbageCollector;",
+      "timestamp": "2025-12-31T02:09:24.618Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 12,
+      "line_number_start": 124,
+      "line_number_end": 128,
+      "code": "\t// Initialize shadow metadata manager with workspace state\n\tshadowMetadataManager = new ShadowMetadataManager(context.workspaceState);\n\tawait shadowMetadataManager.loadFromWorkspace();\n\tLogger.info('Shadow metadata manager initialized');\n",
+      "timestamp": "2025-12-31T02:09:35.818Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 14,
+      "line_number_start": 132,
+      "line_number_end": 142,
+      "code": "\t// Connect metadata manager to change detector\n\tcoordinator.getChangeDetector().setMetadataManager(shadowMetadataManager);\n\n\t// Initialize garbage collector\n\tshadowGarbageCollector = new ShadowGarbageCollector(\n\t\tcoordinator.getChangeDetector(),\n\t\tshadowMetadataManager\n\t);\n\tshadowGarbageCollector.start();\n\tLogger.info('Shadow garbage collector started');\n",
+      "timestamp": "2025-12-31T02:09:35.818Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 14,
+      "line_number_start": 271,
+      "line_number_end": 278,
+      "code": "\n    /**\n     * Get the change detector instance\n     * Used for integrating with metadata manager and garbage collector\n     */\n    public getChangeDetector(): ChangeDetector {\n        return this._changeDetector;\n    }",
+      "timestamp": "2025-12-31T02:09:43.845Z",
+      "file": "/Users/swarit-dev/voight/src/detection/detectionCoordinator.ts"
+    },
+    {
+      "block_no": 15,
+      "line_number_start": 444,
+      "line_number_end": 461,
+      "code": "export async function deactivate() {\n\tLogger.info('Extension deactivating...');\n\n\t// Stop garbage collector\n\tif (shadowGarbageCollector) {\n\t\tshadowGarbageCollector.stop();\n\t\tLogger.info('Garbage collector stopped');\n\t}\n\n\t// Save metadata\n\tif (shadowMetadataManager) {\n\t\tawait shadowMetadataManager.saveToWorkspace();\n\t\tLogger.info('Shadow metadata saved');\n\t}\n\n\t// Save debug data if enabled\n\tif (debugLogger) {\n\t\tLogger.info('Saving debug data...');",
+      "timestamp": "2025-12-31T02:09:51.852Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 17,
+      "line_number_start": 465,
+      "line_number_end": 465,
+      "code": "\tLogger.info('Extension deactivated');",
+      "timestamp": "2025-12-31T02:09:51.852Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 17,
+      "line_number_start": 209,
+      "line_number_end": 211,
+      "code": "\t\t// Remove shadow metadata\n\t\tshadowMetadataManager.removeMetadata(filePath);\n",
+      "timestamp": "2025-12-31T02:10:01.943Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 18,
+      "line_number_start": 424,
+      "line_number_end": 452,
+      "code": "\tconst showGCStatsCommand = vscode.commands.registerCommand('voight.showGCStats', () => {\n\t\tconst gcStats = shadowMetadataManager.getGCStats();\n\t\tconst analytics = shadowMetadataManager.getAnalyticsSummary();\n\t\tconst changeDetector = coordinator.getChangeDetector();\n\t\tconst gcConfig = shadowGarbageCollector.getConfig();\n\n\t\tconst message = `Shadow Garbage Collector:\nStatus: ${gcConfig.isRunning ? 'Running' : 'Stopped'}\nGC Interval: ${gcConfig.intervalMinutes} minutes\nRetention: ${gcConfig.retentionMinutes} minutes\n\nCurrent State:\nActive shadows: ${changeDetector.getShadowCount()}\nTotal memory: ${formatBytes(changeDetector.getTotalMemoryUsage())}\n\nMetadata:\nTotal files tracked: ${analytics.totalFiles}\nActive files: ${analytics.activeFiles}\nRemoved files: ${analytics.removedFiles}\nTotal lifecycles: ${analytics.totalLifecycles}\n\nGC Stats:\nTotal runs: ${gcStats.totalRuns}\nTotal shadows removed: ${gcStats.totalShadowsRemoved}\nTotal memory freed: ${formatBytes(gcStats.totalMemoryFreed)}\nLast run: ${gcStats.lastRunAt > 0 ? new Date(gcStats.lastRunAt).toLocaleString() : 'Never'}`;\n\n\t\tvscode.window.showInformationMessage(message);\n\t});",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 20,
+      "line_number_start": 465,
+      "line_number_end": 473,
+      "code": "\tfunction formatBytes(bytes: number): string {\n\t\tif (bytes < 1024) {\n\t\t\treturn `${bytes}B`;\n\t\t}\n\t\tif (bytes < 1024 * 1024) {\n\t\t\treturn `${(bytes / 1024).toFixed(1)}KB`;\n\t\t}\n\t\treturn `${(bytes / (1024 * 1024)).toFixed(1)}MB`;\n\t}",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 22,
+      "line_number_start": 465,
+      "line_number_end": 473,
+      "code": "\tfunction formatBytes(bytes: number): string {\n\t\tif (bytes < 1024) {\n\t\t\treturn `${bytes}B`;\n\t\t}\n\t\tif (bytes < 1024 * 1024) {\n\t\t\treturn `${(bytes / 1024).toFixed(1)}KB`;\n\t\t}\n\t\treturn `${(bytes / (1024 * 1024)).toFixed(1)}MB`;\n\t}",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 24,
+      "line_number_start": 465,
+      "line_number_end": 473,
+      "code": "\tfunction formatBytes(bytes: number): string {\n\t\tif (bytes < 1024) {\n\t\t\treturn `${bytes}B`;\n\t\t}\n\t\tif (bytes < 1024 * 1024) {\n\t\t\treturn `${(bytes / 1024).toFixed(1)}KB`;\n\t\t}\n\t\treturn `${(bytes / (1024 * 1024)).toFixed(1)}MB`;\n\t}",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 26,
+      "line_number_start": 424,
+      "line_number_end": 452,
+      "code": "\tconst showGCStatsCommand = vscode.commands.registerCommand('voight.showGCStats', () => {\n\t\tconst gcStats = shadowMetadataManager.getGCStats();\n\t\tconst analytics = shadowMetadataManager.getAnalyticsSummary();\n\t\tconst changeDetector = coordinator.getChangeDetector();\n\t\tconst gcConfig = shadowGarbageCollector.getConfig();\n\n\t\tconst message = `Shadow Garbage Collector:\nStatus: ${gcConfig.isRunning ? 'Running' : 'Stopped'}\nGC Interval: ${gcConfig.intervalMinutes} minutes\nRetention: ${gcConfig.retentionMinutes} minutes\n\nCurrent State:\nActive shadows: ${changeDetector.getShadowCount()}\nTotal memory: ${formatBytes(changeDetector.getTotalMemoryUsage())}\n\nMetadata:\nTotal files tracked: ${analytics.totalFiles}\nActive files: ${analytics.activeFiles}\nRemoved files: ${analytics.removedFiles}\nTotal lifecycles: ${analytics.totalLifecycles}\n\nGC Stats:\nTotal runs: ${gcStats.totalRuns}\nTotal shadows removed: ${gcStats.totalShadowsRemoved}\nTotal memory freed: ${formatBytes(gcStats.totalMemoryFreed)}\nLast run: ${gcStats.lastRunAt > 0 ? new Date(gcStats.lastRunAt).toLocaleString() : 'Never'}`;\n\n\t\tvscode.window.showInformationMessage(message);\n\t});",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 28,
+      "line_number_start": 424,
+      "line_number_end": 452,
+      "code": "\tconst showGCStatsCommand = vscode.commands.registerCommand('voight.showGCStats', () => {\n\t\tconst gcStats = shadowMetadataManager.getGCStats();\n\t\tconst analytics = shadowMetadataManager.getAnalyticsSummary();\n\t\tconst changeDetector = coordinator.getChangeDetector();\n\t\tconst gcConfig = shadowGarbageCollector.getConfig();\n\n\t\tconst message = `Shadow Garbage Collector:\nStatus: ${gcConfig.isRunning ? 'Running' : 'Stopped'}\nGC Interval: ${gcConfig.intervalMinutes} minutes\nRetention: ${gcConfig.retentionMinutes} minutes\n\nCurrent State:\nActive shadows: ${changeDetector.getShadowCount()}\nTotal memory: ${formatBytes(changeDetector.getTotalMemoryUsage())}\n\nMetadata:\nTotal files tracked: ${analytics.totalFiles}\nActive files: ${analytics.activeFiles}\nRemoved files: ${analytics.removedFiles}\nTotal lifecycles: ${analytics.totalLifecycles}\n\nGC Stats:\nTotal runs: ${gcStats.totalRuns}\nTotal shadows removed: ${gcStats.totalShadowsRemoved}\nTotal memory freed: ${formatBytes(gcStats.totalMemoryFreed)}\nLast run: ${gcStats.lastRunAt > 0 ? new Date(gcStats.lastRunAt).toLocaleString() : 'Never'}`;\n\n\t\tvscode.window.showInformationMessage(message);\n\t});",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 30,
+      "line_number_start": 465,
+      "line_number_end": 473,
+      "code": "\tfunction formatBytes(bytes: number): string {\n\t\tif (bytes < 1024) {\n\t\t\treturn `${bytes}B`;\n\t\t}\n\t\tif (bytes < 1024 * 1024) {\n\t\t\treturn `${(bytes / 1024).toFixed(1)}KB`;\n\t\t}\n\t\treturn `${(bytes / (1024 * 1024)).toFixed(1)}MB`;\n\t}",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 32,
+      "line_number_start": 424,
+      "line_number_end": 452,
+      "code": "\tconst showGCStatsCommand = vscode.commands.registerCommand('voight.showGCStats', () => {\n\t\tconst gcStats = shadowMetadataManager.getGCStats();\n\t\tconst analytics = shadowMetadataManager.getAnalyticsSummary();\n\t\tconst changeDetector = coordinator.getChangeDetector();\n\t\tconst gcConfig = shadowGarbageCollector.getConfig();\n\n\t\tconst message = `Shadow Garbage Collector:\nStatus: ${gcConfig.isRunning ? 'Running' : 'Stopped'}\nGC Interval: ${gcConfig.intervalMinutes} minutes\nRetention: ${gcConfig.retentionMinutes} minutes\n\nCurrent State:\nActive shadows: ${changeDetector.getShadowCount()}\nTotal memory: ${formatBytes(changeDetector.getTotalMemoryUsage())}\n\nMetadata:\nTotal files tracked: ${analytics.totalFiles}\nActive files: ${analytics.activeFiles}\nRemoved files: ${analytics.removedFiles}\nTotal lifecycles: ${analytics.totalLifecycles}\n\nGC Stats:\nTotal runs: ${gcStats.totalRuns}\nTotal shadows removed: ${gcStats.totalShadowsRemoved}\nTotal memory freed: ${formatBytes(gcStats.totalMemoryFreed)}\nLast run: ${gcStats.lastRunAt > 0 ? new Date(gcStats.lastRunAt).toLocaleString() : 'Never'}`;\n\n\t\tvscode.window.showInformationMessage(message);\n\t});",
+      "timestamp": "2025-12-31T02:10:18.641Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 26,
+      "line_number_start": 492,
+      "line_number_end": 493,
+      "code": "\t\tshowGCStatsCommand,\n\t\trunGCCommand,",
+      "timestamp": "2025-12-31T02:10:27.407Z",
+      "file": "/Users/swarit-dev/voight/src/extension.ts"
+    },
+    {
+      "block_no": 27,
+      "line_number_start": 77,
+      "line_number_end": 84,
+      "code": "      },\n      {\n        \"command\": \"voight.showGCStats\",\n        \"title\": \"Voight: Show Shadow GC Statistics\"\n      },\n      {\n        \"command\": \"voight.runGC\",\n        \"title\": \"Voight: Run Garbage Collection Now\"",
+      "timestamp": "2025-12-31T02:10:37.823Z",
+      "file": "/Users/swarit-dev/voight/package.json"
+    }
+  ],
+  "metadata": {
+    "session": "2025-12-30T23-07-15-270Z",
+    "totalBlocks": 28,
+    "lastUpdated": "2025-12-31T02:10:37.824Z"
+  }
+}
