@@ -22954,7 +22954,7 @@ async function activate(context) {
       modeString = "Test Mode";
       break;
   }
-  const buildTimestamp = true ? "2026-01-02T06:14:42.754Z" : "unknown";
+  const buildTimestamp = true ? "2026-01-02T05:09:04.939Z" : "unknown";
   const buildMode = true ? "development" : "unknown";
   Logger.info(`Voight v${version} activated`);
   Logger.debug(`Extension mode: ${modeString}`);
