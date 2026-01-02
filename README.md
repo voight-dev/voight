@@ -1,98 +1,120 @@
-# Voight
+<p align="center">
+  <img src="resources/icon.png" alt="Voight" width="128" height="128">
+</p>
 
-**Voight** ensures human intent drives AI generation, bridging the gap between speed and understanding.
+<h1 align="center">Voight</h1>
 
-## Features
+<p align="center">
+  Track and review AI-generated code in VS Code.
+  <br>
+  <a href="https://voight.dev">voight.dev</a>
+</p>
 
-Voight automatically detects AI-generated code segments in your workspace and helps you:
+## What It Does
 
-- **Track AI-Generated Code**: Automatically detects and highlights code segments that may have been AI-generated
-- **Analyze Complexity**: Measures code complexity using cyclomatic complexity analysis
-- **Add Context**: Annotate segments with notes explaining the purpose and intent
-- **Star Important Segments**: Mark critical segments for quick access
-- **Multi-Language Support**: Works with JavaScript, TypeScript, Python, and Go
+Voight detects code insertions from AI assistants and organizes them into reviewable segments. When you're moving fast with AI-assisted development, it keeps you oriented without requiring you to stop.
 
-## Requirements
+- **Timeline View**: Chronological sequence of AI edits across all files. Useful when changes span multiple files and you need to understand the order.
+- **Segments**: Detected code blocks displayed in a sidebar panel. Click to navigate, review at your own pace.
+- **Complexity Indicators**: Cyclomatic complexity scores per segment. Higher scores indicate denser control flow.
+- **Context Markers**: Attach notes to segments. Useful for flagging code that needs review or documenting intent.
+- **BYOK Explanations**: Request an AI explanation for any segment using your own API key. Independent of the AI that generated the code.
 
-- Visual Studio Code 1.106.1 or higher
-- Optional: API keys for AI explanations (Anthropic Claude, Google Gemini, or OpenAI)
-  - 📖 **[View API Setup Guide](API_SETUP_GUIDE.md)** for detailed instructions
+## Installation
 
-## Extension Settings
+### From Marketplace
 
-This extension contributes the following settings:
-
-### AI Settings
-* `voight.ai.provider`: AI provider for code explanations (`gemini`, `anthropic`, or `openai`)
-* `voight.ai.apiKey`: API key for your chosen AI provider ([Setup Guide](API_SETUP_GUIDE.md))
-* `voight.ai.model`: Model to use (defaults to provider's default model)
-* `voight.ai.maxTokens`: Maximum tokens for AI response (default: 2048)
-
-> **💡 Need help setting up AI explanations?** Check out the [API Setup Guide](API_SETUP_GUIDE.md) for step-by-step instructions.
-
-### Detection Settings
-* `voight.detection.excludePatterns`: File patterns to exclude from detection
-  - Supports glob patterns like `**/*.css`, `**/test/**`
-  - Supports regex patterns with `!` prefix like `!/test\d+\.js$/`
-  - Default excludes: minified files, dist, build, node_modules, .git
-
-**Examples:**
-```json
-{
-  "voight.detection.excludePatterns": [
-    "**/*.css",           // Exclude all CSS files
-    "**/*.min.js",        // Exclude minified JavaScript
-    "**/test/**",         // Exclude test directories
-    "**/generated/**",    // Exclude generated code
-    "!/.*\\.test\\.ts$/", // Regex: exclude files ending with .test.ts
-    "!/temp\\d+\\.js$/"   // Regex: exclude temp1.js, temp2.js, etc.
-  ]
-}
+```
+ext install voight-dev.voight
 ```
 
-## Usage
+Or search "Voight" in the VS Code Extensions panel.
 
-1. Open any code file in your workspace
-2. Voight will automatically detect AI-generated segments
-3. Click on the Voight icon in the Activity Bar to see detected segments
-4. Expand segments to view details, add notes, or request AI explanations
-5. Star important segments to keep them visible across sessions
+### From Source
+
+```bash
+git clone https://github.com/voight-dev/voight.git
+cd voight
+pnpm install
+pnpm package
+code --install-extension voight-0.0.1.vsix
+```
+
+## Configuration
+
+### Detection
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `voight.detection.minCharacters` | 50 | Minimum characters for insertion detection |
+| `voight.detection.minLines` | 2 | Minimum lines for multi-line detection |
+| `voight.detection.semanticExpansion` | none | Context expansion: `none`, `minimal`, `balanced`, `maximum` |
+| `voight.detection.excludePatterns` | See below | Glob/regex patterns to exclude |
+
+Default exclusions: `**/*.min.js`, `**/*.min.css`, `**/dist/**`, `**/build/**`, `**/node_modules/**`, `**/.git/**`
+
+Regex patterns use `!` prefix: `!/test\d+\.js$/`
+
+### AI Provider
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `voight.ai.provider` | gemini | `gemini`, `anthropic`, or `openai` |
+| `voight.ai.apiKey` | - | API key for chosen provider |
+| `voight.ai.model` | - | Model override (defaults: gemini-2.0-flash, claude-sonnet-4-20250514, gpt-4o) |
+| `voight.ai.maxTokens` | 2048 | Response token limit (256-8192) |
+
+### Debug
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `voight.debug.enabled` | true | Verbose logging |
+| `voight.debug.saveDebugData` | false | Save debug JSON to `.voight-debug/` |
 
 ## Commands
 
-- `Voight: Health Check` - Check if the extension is working correctly
-- `Voight: Show Paste Detection Stats` - View statistics about paste detection
-- `Voight: Show Block Statistics` - View statistics about detected blocks
-- `Voight: Clear All Blocks` - Clear all detected segments
+| Command | Description |
+|---------|-------------|
+| `Voight: Health Check` | Run diagnostics |
+| `Voight: Show Paste Detection Stats` | Detection statistics |
+| `Voight: Show Block Statistics` | Segment counts and metrics |
+| `Voight: Clear All Blocks` | Remove all segments |
+| `Voight: Show Current File Blocks` | List segments in active file |
+| `Voight: Show All Context Notes for File` | Browse annotations |
+| `Voight: Show Top Edited Files` | Files ranked by edit frequency |
+| `Voight: Show File Tracking Statistics` | Edit analytics |
+| `Voight: Export File Rankings` | Export as JSON |
+| `Voight: Show Current File Tracking` | Tracking info for active file |
+| `Voight: Clear File Tracking Data` | Reset analytics |
+| `Voight: Show Shadow GC Statistics` | Memory management stats |
+| `Voight: Run Garbage Collection Now` | Force garbage collection |
+
+## Supported Languages
+
+Complexity analysis: TypeScript, JavaScript, Python, Go
+
+Detection works with any text file.
 
 ## Development
 
-### Local Development Workflow
-
-For rapid iteration during development:
-
 ```bash
-# Install the latest version locally
-pnpm dev-install
-
-# Then reload VS Code windows:
-# Press Cmd+Shift+P → "Developer: Reload Window"
+git clone https://github.com/voight-dev/voight.git
+cd voight
+pnpm install
 ```
 
-This script will:
-1. Build and package the extension
-2. Uninstall the old version
-3. Install the new version
-4. Prompt you to reload VS Code
+```bash
+pnpm compile      # Type check + lint + build
+pnpm watch        # Watch mode
+pnpm package      # Production build
+pnpm test         # Run tests
+pnpm dev-install  # Install locally, then reload VS Code
+```
 
-See [scripts/README.md](scripts/README.md) for more details.
+## Credits
 
-## Release Notes
+Complexity analysis ported from [Lizard](https://github.com/terryyin/lizard) by Terry Yin.
 
-### 0.0.1
+## License
 
-Initial development release of Voight.
-
----
-
-**Enjoy using Voight!**
+MIT
