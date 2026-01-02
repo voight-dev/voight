@@ -1,4 +1,5 @@
 node_modules
+dist/
 .ai/
 *.vsix
 .voight-debug/
