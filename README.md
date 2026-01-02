@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="resources/icon.png" alt="Voight" width="128" height="128">
+  <img src="https://github.com/voight-dev/voight/blob/main/resources/icon.png" alt="Voight" width="128" height="128">
 </p>
 
 <h1 align="center">Voight</h1>
@@ -20,37 +20,37 @@ Voight detects code insertions from AI assistants and organizes them into review
 
 See all AI-generated segments across your workspace in chronological order. Switch between viewing all files or focus on a single file. Each segment shows when it was created and which file it belongs to.
 
-![Timeline View](resources/timeline-view.png)
+![Timeline View](https://github.com/voight-dev/voight/blob/main/resources/timeline-view.png)
 
 ### All Files View
 
 When working across multiple files, the "All Files" view shows every detected segment with file switching indicators. Easily track the sequence of AI edits across your entire project.
 
-![All Files Timeline](resources/all-timeline-view.png)
+![All Files Timeline](https://github.com/voight-dev/voight/blob/main/resources/all-timeline-view.png)
 
 ### Complexity Indicators
 
 Each segment displays cyclomatic complexity scores. Higher scores indicate denser control flow - useful for identifying code that may need closer review or refactoring.
 
-![Complexity Indicators](resources/complexity.png)
+![Complexity Indicators](https://github.com/voight-dev/voight/blob/main/resources/complexity.png)
 
 ### Diff View
 
 Expand any segment to see what changed. The diff view highlights additions and removals, showing exactly what the AI modified in your code.
 
-![Diff View](resources/diff-view.png)
+![Diff View](https://github.com/voight-dev/voight/blob/main/resources/diff-view.png)
 
 ### AI Explanations (BYOK)
 
 Request an AI explanation for any segment using your own API key. Get a breakdown of what the code does, how it works, and what to watch out for - independent of the AI that generated it.
 
-![AI Explanation](resources/ai-explanation.png)
+![AI Explanation](https://github.com/voight-dev/voight/blob/main/resources/ai-explanation.png)
 
 ### Context Notes
 
 Attach notes to any segment. Flag code for review, document your intent, or leave reminders for yourself. Notes persist with the segment and help you stay organized.
 
-![Add Context](resources/add-context.png)
+![Add Context](https://github.com/voight-dev/voight/blob/main/resources/add-context.png)
 
 ## Installation
 

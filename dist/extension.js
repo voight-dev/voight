@@ -6447,7 +6447,7 @@ var vscode = __toESM(require("vscode"));
 var Logger = class {
   static outputChannel;
   static debugMode = false;
-  static isProduction = typeof __PRODUCTION__ !== "undefined" ? __PRODUCTION__ : false;
+  static isProduction = true ? false : false;
   static configure(name, debugMode = false) {
     this.outputChannel = vscode.window.createOutputChannel(name);
     this.debugMode = this.isProduction ? false : debugMode;
@@ -22955,7 +22955,7 @@ async function activate(context) {
       modeString = "Test Mode";
       break;
   }
-  const buildTimestamp = true ? "2026-01-02T05:09:04.939Z" : "unknown";
+  const buildTimestamp = true ? "2026-01-02T07:55:22.559Z" : "unknown";
   const buildMode = true ? "development" : "unknown";
   Logger.info(`Voight v${version} activated`);
   Logger.debug(`Extension mode: ${modeString}`);
