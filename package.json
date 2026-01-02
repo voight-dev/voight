@@ -2,7 +2,7 @@
   "name": "voight",
   "displayName": "Voight",
   "description": "Ensures human intent drives AI generation, bridging the gap between speed and understanding.",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "publisher": "SwaritPandey",
   "license": "MIT",
   "author": {
