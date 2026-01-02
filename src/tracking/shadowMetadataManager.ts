@@ -32,7 +32,7 @@ export class ShadowMetadataManager {
                 memoryFreed: 0
             }
         };
-        Logger.info('ShadowMetadataManager initialized');
+        Logger.debug('ShadowMetadataManager initialized');
     }
 
     /**
@@ -53,7 +53,7 @@ export class ShadowMetadataManager {
                 this._gcStats = gcStats;
             }
 
-            Logger.info(`Loaded metadata for ${this._metadata.size} files from workspace`);
+            Logger.debug(`Loaded metadata for ${this._metadata.size} files from workspace`);
         } catch (error) {
             Logger.error(`Failed to load metadata: ${error}`);
         }
@@ -92,7 +92,7 @@ export class ShadowMetadataManager {
             existing.totalLifecycles++;
             existing.activeEditHistory.clear();
             existing.lastShadowSize = shadowSize;
-            Logger.info(`Restarted lifecycle ${existing.totalLifecycles} for ${filePath}`);
+            Logger.debug(`Restarted lifecycle ${existing.totalLifecycles} for ${filePath}`);
         } else if (!existing) {
             // Create new metadata
             this._metadata.set(filePath, {
@@ -170,7 +170,7 @@ export class ShadowMetadataManager {
         metadata.firstEditAt = undefined;
         metadata.peakEditRate = undefined;
 
-        Logger.info(`Marked ${filePath} as removed (${totalEdits} edits, ${Math.round(activeDuration / 1000)}s active)`);
+        Logger.debug(`Marked ${filePath} as removed (${totalEdits} edits, ${Math.round(activeDuration / 1000)}s active)`);
     }
 
     /**
@@ -228,7 +228,7 @@ export class ShadowMetadataManager {
             memoryFreed
         };
 
-        Logger.info(`GC Stats: Run #${this._gcStats.totalRuns}, removed ${shadowsRemoved} shadows, freed ${this._formatBytes(memoryFreed)}`);
+        Logger.debug(`GC Stats: Run #${this._gcStats.totalRuns}, removed ${shadowsRemoved} shadows, freed ${this._formatBytes(memoryFreed)}`);
     }
 
     /**

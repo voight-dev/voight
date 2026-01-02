@@ -57,12 +57,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	const buildTimestamp = typeof __BUILD_TIMESTAMP__ !== 'undefined' ? __BUILD_TIMESTAMP__ : 'unknown';
 	const buildMode = typeof __BUILD_MODE__ !== 'undefined' ? __BUILD_MODE__ : 'unknown';
 
-	Logger.info(`=== Voight v${version} ===`);
-	Logger.info(`Extension mode: ${modeString}`);
-	Logger.info(`Build: ${buildMode} @ ${buildTimestamp}`);
-	Logger.info(`Debug logging: ${debugMode ? 'ENABLED' : 'DISABLED'}`);
-	Logger.info(`Extension activated`);
-	Logger.show();
+	Logger.info(`Voight v${version} activated`);
+	Logger.debug(`Extension mode: ${modeString}`);
+	Logger.debug(`Build: ${buildMode} @ ${buildTimestamp}`);
+	Logger.debug(`Debug logging: ${debugMode ? 'ENABLED' : 'DISABLED'}`);
 
 	// Register health check command
 	const healthCheckCommand = vscode.commands.registerCommand('voight.healthCheck', healthCheck);
@@ -76,16 +74,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 
 	const workspaceRoot = workspaceFolders[0].uri.fsPath;
-	Logger.info(`Workspace root: ${workspaceRoot}`);
+	Logger.debug(`Workspace root: ${workspaceRoot}`);
 
 	// Initialize segment repository
 	const segmentRepository = new VscodeSegmentRepository(context);
 	await segmentRepository.initialize();
-	Logger.info('Segment repository initialized');
+	Logger.debug('Segment repository initialized');
 
 	// Initialize file tracking service
 	fileTrackingService = new FileTrackingService(context);
-	Logger.info('File tracking service initialized');
+	Logger.debug('File tracking service initialized');
 
 	// Subscribe to real-time file edit events
 	const fileEditListener = fileTrackingService.onFileEdited((event) => {
@@ -95,7 +93,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Initialize file registry to track existing files
 	fileRegistry = new FileRegistry();
 	await fileRegistry.initialize(workspaceRoot);
-	Logger.info(`File registry initialized with ${fileRegistry.getCount()} files`);
+	Logger.debug(`File registry initialized with ${fileRegistry.getCount()} files`);
 
 	// Initialize UI layer
 	const highlighter = createDefaultHighlighter();
@@ -122,7 +120,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Initialize debug logger only if debug mode is enabled
 	if (debugMode) {
 		debugLogger = new DebugLogger(workspaceRoot);
-		Logger.info('Debug logger initialized - JSON files will be saved to .voight-debug/');
+		Logger.debug('Debug logger initialized - JSON files will be saved to .voight-debug/');
 	} else {
 		debugLogger = undefined;
 	}
@@ -130,7 +128,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Initialize shadow metadata manager with workspace state
 	shadowMetadataManager = new ShadowMetadataManager(context.workspaceState);
 	await shadowMetadataManager.loadFromWorkspace();
-	Logger.info('Shadow metadata manager initialized');
+	Logger.debug('Shadow metadata manager initialized');
 
 	// Initialize detection coordinator with file registry, UI and optional debug integration
 	coordinator = new DetectionCoordinator(fileRegistry, blockManager, debugLogger);
@@ -144,7 +142,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		shadowMetadataManager
 	);
 	shadowGarbageCollector.start();
-	Logger.info('Shadow garbage collector started');
+	Logger.debug('Shadow garbage collector started');
 
 	// Initialize tracking for all currently open documents
 	vscode.workspace.textDocuments.forEach(doc => {
@@ -169,11 +167,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		Logger.info(`File system: New file created on disk - ${uri.fsPath}`);
+		Logger.debug(`File created: ${vscode.workspace.asRelativePath(uri.fsPath)}`);
 
 		// Check if file is already known
 		if (!fileRegistry.isKnown(uri.fsPath)) {
-			Logger.info(`File system: This is a NEW file - marking for tracking`);
+			Logger.debug(`New file detected, marking for tracking`);
 
 			// Wait a brief moment to see if user is actively editing this file
 			await new Promise(resolve => setTimeout(resolve, 500));
@@ -183,14 +181,14 @@ export async function activate(context: vscode.ExtensionContext) {
 			const isActivelyEditing = activeEditor?.document.uri.fsPath === uri.fsPath;
 
 			if (isActivelyEditing) {
-				Logger.info(`File system: User is actively editing - will use normal paste detection`);
+				Logger.debug(`User actively editing, will use normal paste detection`);
 				// Don't register yet - let initializeDocument handle it
 				return;
 			}
 
 			// File was created by AI/external tool and not actively being edited
 			// Mark it as a "pending new file" that should be fully tracked when opened
-			Logger.info(`File system: Marking as AI-generated file (will process when opened)`);
+			Logger.debug(`AI-generated file detected, will track when opened`);
 			// Don't register it - this keeps it "unknown" so initializeDocument will handle it specially
 		}
 	});
@@ -201,7 +199,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 
 		const filePath = uri.fsPath;
-		Logger.info(`File system: File deleted - ${filePath}`);
+		Logger.debug(`File deleted: ${vscode.workspace.asRelativePath(filePath)}`);
 
 		// Remove from file registry
 		fileRegistry.unregister(filePath);
@@ -215,7 +213,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		// Remove shadow metadata
 		shadowMetadataManager.removeMetadata(filePath);
 
-		Logger.info(`File system: Cleaned up tracking data for deleted file`);
+		Logger.debug(`Cleaned up tracking data for deleted file`);
 	});
 
 	// Show paste detection stats command
@@ -500,31 +498,40 @@ Last run: ${gcStats.lastRunAt > 0 ? new Date(gcStats.lastRunAt).toLocaleString()
 		fileEditListener
 	);
 
-	Logger.info('Detection system ready');
+	Logger.info('AI-assisted code detection active');
+
+	// Validate persisted segments at startup (async, non-blocking)
+	coordinator.validateAllSegments().then(result => {
+		if (result.removed > 0) {
+			Logger.info(`Removed ${result.removed} stale segments`);
+		}
+	}).catch(error => {
+		Logger.error(`Startup validation failed: ${error}`);
+	});
 }
 
 // This method is called when your extension is deactivated
 export async function deactivate() {
-	Logger.info('Extension deactivating...');
+	Logger.debug('Extension deactivating');
 
 	// Stop garbage collector
 	if (shadowGarbageCollector) {
 		shadowGarbageCollector.stop();
-		Logger.info('Garbage collector stopped');
+		Logger.debug('Garbage collector stopped');
 	}
 
 	// Save metadata
 	if (shadowMetadataManager) {
 		await shadowMetadataManager.saveToWorkspace();
-		Logger.info('Shadow metadata saved');
+		Logger.debug('Shadow metadata saved');
 	}
 
 	// Save debug data if enabled
 	if (debugLogger) {
-		Logger.info('Saving debug data...');
+		Logger.debug('Saving debug data');
 		coordinator.saveDebugData();
 	}
 
-	Logger.info('Extension deactivated');
+	Logger.debug('Extension deactivated');
 	Logger.dispose();
 }

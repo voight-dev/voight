@@ -16,6 +16,11 @@ export interface AIProvider {
      * Check if provider is configured (has API key)
      */
     isConfigured(): boolean;
+
+    /**
+     * Get the default model name for this provider
+     */
+    getDefaultModel(): string;
 }
 
 /**

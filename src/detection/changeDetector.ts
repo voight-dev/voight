@@ -35,6 +35,7 @@ export interface DetectedBlock {
     coreChangeStart: number;
     coreChangeEnd: number;
     code: string;
+    beforeCode?: string; // The code before changes (from shadow state) for diff view
     timestamp: string;
     expandedContext: boolean;
     complexityScore?: number; // 1-10 score indicating code complexity
@@ -99,7 +100,7 @@ export class ChangeDetector {
                 timestamp: Date.now()
             };
             this._shadowDocuments.set(filePath, emptySnapshot);
-            Logger.info(`ChangeDetector: Initialized NEW FILE with empty shadow state: ${filePath}`);
+            Logger.debug(`ChangeDetector: Initialized NEW FILE with empty shadow state: ${filePath}`);
         } else {
             Logger.debug(`ChangeDetector: File already tracked ${filePath}`);
         }
@@ -123,7 +124,7 @@ export class ChangeDetector {
                 allLines.add(i);
             }
 
-            return this._detectBlocksFromChangedLines(allLines, document);
+            return this._detectBlocksFromChangedLines(allLines, document, undefined);
         }
 
         // Capture final state
@@ -146,9 +147,12 @@ export class ChangeDetector {
             this._metadataManager.recordEdit(filePath, shadowSize);
         }
 
+        // Pass the initial state (before) to block detection for diff view
+        const blocks = this._detectBlocksFromChangedLines(changedLines, document, initialState);
+
         this._updateShadow(document);
 
-        return this._detectBlocksFromChangedLines(changedLines, document);
+        return blocks;
     }
 
     /**
@@ -277,7 +281,8 @@ export class ChangeDetector {
      */
     private _detectBlocksFromChangedLines(
         changedLines: Set<number>,
-        document: vscode.TextDocument
+        document: vscode.TextDocument,
+        shadowState?: DocumentSnapshot
     ): DetectedBlock[] {
         if (changedLines.size === 0) {
             return [];
@@ -316,6 +321,16 @@ export class ChangeDetector {
 
             const code = lines.join('\n');
 
+            // Extract beforeCode from shadow state for diff view
+            let beforeCode: string | undefined;
+            if (shadowState && shadowState.lines.length > 0) {
+                const beforeLines: string[] = [];
+                for (let lineNum = expanded.start; lineNum <= expanded.end && lineNum < shadowState.lines.length; lineNum++) {
+                    beforeLines.push(shadowState.lines[lineNum]);
+                }
+                beforeCode = beforeLines.join('\n');
+            }
+
             // Filter out segments that are only whitespace/empty lines
             const hasNonWhitespaceContent = lines.some(line => line.trim().length > 0);
             if (!hasNonWhitespaceContent) {
@@ -340,7 +355,8 @@ export class ChangeDetector {
                         expanded,
                         original,
                         functions,
-                        document
+                        document,
+                        shadowState
                     );
                 } else {
                     // Single function or no functions - treat as single block
@@ -365,6 +381,7 @@ export class ChangeDetector {
                         coreChangeStart: original.start,
                         coreChangeEnd: original.end,
                         code,
+                        beforeCode,
                         timestamp: new Date().toISOString(),
                         expandedContext: expanded.start !== original.start || expanded.end !== original.end,
                         complexityScore,
@@ -382,6 +399,7 @@ export class ChangeDetector {
                     coreChangeStart: original.start,
                     coreChangeEnd: original.end,
                     code,
+                    beforeCode,
                     timestamp: new Date().toISOString(),
                     expandedContext: expanded.start !== original.start || expanded.end !== original.end,
                     complexityScore: undefined,
@@ -391,7 +409,7 @@ export class ChangeDetector {
             }
         });
 
-        Logger.info(`Created ${blocks.length} blocks (after function-level splitting)`);
+        Logger.debug(`Created ${blocks.length} blocks (after function-level splitting)`);
         return blocks;
     }
 
@@ -403,7 +421,8 @@ export class ChangeDetector {
         expanded: { start: number; end: number },
         original: { start: number; end: number },
         functions: FunctionInfo[],
-        document: vscode.TextDocument
+        document: vscode.TextDocument,
+        shadowState?: DocumentSnapshot
     ): DetectedBlock[] {
         const blocks: DetectedBlock[] = [];
 
@@ -489,6 +508,16 @@ export class ChangeDetector {
             }
             const functionCode = functionLines.join('\n');
 
+            // Extract beforeCode from shadow state for diff view
+            let beforeCode: string | undefined;
+            if (shadowState && shadowState.lines.length > 0) {
+                const beforeLines: string[] = [];
+                for (let lineNum = functionStart; lineNum <= functionEnd && lineNum < shadowState.lines.length; lineNum++) {
+                    beforeLines.push(shadowState.lines[lineNum]);
+                }
+                beforeCode = beforeLines.join('\n');
+            }
+
             // Score this specific function
             const functionAnalysis = {
                 totalCCN: func.cyclomaticComplexity,
@@ -507,6 +536,7 @@ export class ChangeDetector {
                 coreChangeStart: Math.max(functionStart, original.start),
                 coreChangeEnd: Math.min(functionEnd, original.end),
                 code: functionCode,
+                beforeCode,
                 timestamp: new Date().toISOString(),
                 expandedContext: false, // Function boundaries are precise
                 complexityScore: scoreResult.score,

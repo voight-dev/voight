@@ -65,7 +65,7 @@ export class BlockManager {
             }
 
             if (allSegments.length > 0) {
-                Logger.info(`Loaded ${allSegments.length} persisted segments from ${new Set(allSegments.map(s => s.filePath)).size} files`);
+                Logger.debug(`Loaded ${allSegments.length} persisted segments from ${new Set(allSegments.map(s => s.filePath)).size} files`);
 
                 // Notify callbacks that segments were loaded
                 this._onBlockRegisteredCallbacks.forEach(callback => callback());
@@ -246,8 +246,10 @@ export class BlockManager {
     /**
      * Remove a block entirely
      * Deletes from both highlighter and repository
+     * @param blockId - The ID of the block to remove
+     * @param notifyCallbacks - If true, notify registered callbacks to update UI (default: false)
      */
-    public remove(blockId: string): void {
+    public remove(blockId: string, notifyCallbacks: boolean = false): void {
         const segment = this.highlighter.getSegment(blockId);
         this.highlighter.removeSegment(blockId);
 
@@ -255,6 +257,11 @@ export class BlockManager {
             this._segmentRepository.delete(segment.filePath, segment.startLine, segment.endLine).catch((error: Error) => {
                 Logger.error(`Failed to delete segment from repository: ${error}`);
             });
+        }
+
+        // Notify callbacks to update UI if requested
+        if (notifyCallbacks) {
+            this._onBlockRegisteredCallbacks.forEach(callback => callback());
         }
     }
 
@@ -270,7 +277,7 @@ export class BlockManager {
             return;
         }
 
-        Logger.info(`Removing ${segments.length} segments for deleted file: ${filePath}`);
+        Logger.debug(`Removing ${segments.length} segments for deleted file: ${filePath}`);
 
         // Remove each segment
         segments.forEach(segment => {
@@ -280,7 +287,7 @@ export class BlockManager {
             });
         });
 
-        Logger.info(`Successfully removed all segments for deleted file: ${filePath}`);
+        Logger.debug(`Successfully removed all segments for deleted file: ${filePath}`);
 
         // Notify callbacks to update UI
         this._onBlockRegisteredCallbacks.forEach(callback => callback());
@@ -296,6 +303,13 @@ export class BlockManager {
         }
 
         return this.highlighter.getSegmentsForFile(activeEditor.document.fileName);
+    }
+
+    /**
+     * Get all segments for a specific file path
+     */
+    public getSegmentsForFile(filePath: string): HighlightSegment[] {
+        return this.highlighter.getSegmentsForFile(filePath);
     }
 
     /**

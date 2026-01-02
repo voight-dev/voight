@@ -64,8 +64,8 @@ export class PasteDebugger {
 
         this._outputPath = path.join(debugDir, `paste-events-${this._sessionStart}.json`);
         this._solutionPath = path.join(debugDir, `solution_${this._sessionStart}.json`);
-        Logger.info(`Will save debug data to: ${this._outputPath}`);
-        Logger.info(`Will save solution to: ${this._solutionPath}`);
+        Logger.debug(`Will save debug data to: ${this._outputPath}`);
+        Logger.debug(`Will save solution to: ${this._solutionPath}`);
     }
 
     /**
@@ -78,7 +78,7 @@ export class PasteDebugger {
         // Only initialize if not already tracked
         if (!this._shadowDocuments.has(filePath)) {
             this._updateShadow(document);
-            Logger.info(`Initialized shadow state for ${filePath}`);
+            Logger.debug(`Initialized shadow state for ${filePath}`);
         }
     }
 
@@ -87,17 +87,17 @@ export class PasteDebugger {
      */
     public analyzeEvent(event: vscode.TextDocumentChangeEvent): void {
         const filePath = event.document.fileName;
-        Logger.info(`\n=== Document Change Event ===`);
-        Logger.info(`File: ${filePath}`);
-        Logger.info(`Total chunks in event: ${event.contentChanges.length}`);
+        Logger.debug(`\n=== Document Change Event ===`);
+        Logger.debug(`File: ${filePath}`);
+        Logger.debug(`Total chunks in event: ${event.contentChanges.length}`);
 
         // Filter to only paste chunks
         const pasteChunks = event.contentChanges.filter(change => this._isPasted(change));
-        Logger.info(`Paste chunks detected: ${pasteChunks.length}`);
+        Logger.debug(`Paste chunks detected: ${pasteChunks.length}`);
 
         if (pasteChunks.length === 0) {
             // No paste detected, just record typed events and update shadow
-            Logger.info(`No paste detected, treating as typed changes`);
+            Logger.debug(`No paste detected, treating as typed changes`);
             event.contentChanges.forEach(change => {
                 this._recordChange(change, event.document, false);
             });
@@ -117,7 +117,7 @@ export class PasteDebugger {
         if (!initialState) {
             // This shouldn't happen if initializeDocument was called properly
             // But handle it gracefully: treat entire document as the change
-            Logger.info(`⚠️  WARNING: No shadow state for ${filePath}, treating entire document as new`);
+            Logger.debug(`⚠️  WARNING: No shadow state for ${filePath}, treating entire document as new`);
             this._updateShadow(event.document);
 
             // Detect blocks from entire document
@@ -125,54 +125,54 @@ export class PasteDebugger {
             for (let i = 0; i < event.document.lineCount; i++) {
                 allLines.add(i);
             }
-            Logger.info(`Treating all ${allLines.size} lines as changed`);
+            Logger.debug(`Treating all ${allLines.size} lines as changed`);
             const blocks = this._detectBlocksFromDiff(allLines, event.document);
-            Logger.info(`Created ${blocks.length} blocks from entire document`);
+            Logger.debug(`Created ${blocks.length} blocks from entire document`);
             for (const block of blocks) {
                 this._blocks.push(block);
-                Logger.info(`✓ Block ${block.block_no}: lines ${block.line_number_start}-${block.line_number_end}`);
+                Logger.debug(`✓ Block ${block.block_no}: lines ${block.line_number_start}-${block.line_number_end}`);
             }
             this._saveSolution();
             return;
         }
 
-        Logger.info(`Shadow state found: ${initialState.lines.length} lines (version ${initialState.version})`);
+        Logger.debug(`Shadow state found: ${initialState.lines.length} lines (version ${initialState.version})`);
 
         // Get final state (F) from event.document
         const finalState = this._captureDocumentState(event.document);
-        Logger.info(`Final state captured: ${finalState.lines.length} lines (version ${finalState.version})`);
+        Logger.debug(`Final state captured: ${finalState.lines.length} lines (version ${finalState.version})`);
 
         // Calculate conflict set: C = F - I (what changed)
         const changedLines = this._diffDocuments(initialState, finalState);
-        Logger.info(`Diff complete: ${changedLines.size} lines changed`);
+        Logger.debug(`Diff complete: ${changedLines.size} lines changed`);
 
         if (changedLines.size === 0) {
-            Logger.info('⚠️  No changes detected in diff (this is unusual)');
+            Logger.debug('⚠️  No changes detected in diff (this is unusual)');
             this._updateShadow(event.document);
             return;
         }
 
         // Log the changed line numbers for debugging
         const changedLineNumbers = Array.from(changedLines).sort((a, b) => a - b);
-        Logger.info(`Changed lines: ${changedLineNumbers.slice(0, 10).join(', ')}${changedLineNumbers.length > 10 ? '...' : ''}`);
+        Logger.debug(`Changed lines: ${changedLineNumbers.slice(0, 10).join(', ')}${changedLineNumbers.length > 10 ? '...' : ''}`);
 
         // Detect blocks from changed lines
         const blocks = this._detectBlocksFromDiff(changedLines, event.document);
-        Logger.info(`Block detection: ${blocks.length} blocks identified`);
+        Logger.debug(`Block detection: ${blocks.length} blocks identified`);
 
         // Save blocks
         for (const block of blocks) {
             this._blocks.push(block);
-            Logger.info(`✓ Block ${block.block_no}: lines ${block.line_number_start}-${block.line_number_end} (${block.line_number_end - block.line_number_start + 1} lines)`);
+            Logger.debug(`✓ Block ${block.block_no}: lines ${block.line_number_start}-${block.line_number_end} (${block.line_number_end - block.line_number_start + 1} lines)`);
         }
 
         // Update shadow to final state for next iteration
         this._updateShadow(event.document);
-        Logger.info(`Shadow state updated for next iteration`);
+        Logger.debug(`Shadow state updated for next iteration`);
 
         // Save solution file
         this._saveSolution();
-        Logger.info(`=== Event Complete ===\n`);
+        Logger.debug(`=== Event Complete ===\n`);
     }
 
     /**
@@ -285,7 +285,7 @@ export class PasteDebugger {
         // Use Myers diff algorithm to get structured changes
         const changes = Diff.diffLines(initialText, finalText);
 
-        Logger.info(`  → Myers diff: ${changes.length} change chunks`);
+        Logger.debug(`  → Myers diff: ${changes.length} change chunks`);
 
         let currentLine = 0; // Track position in final document
 
@@ -294,14 +294,14 @@ export class PasteDebugger {
 
             if (change.added) {
                 // These lines were added - mark them as changed
-                Logger.info(`    Added: ${lineCount} lines at position ${currentLine}`);
+                Logger.debug(`    Added: ${lineCount} lines at position ${currentLine}`);
                 for (let i = 0; i < lineCount; i++) {
                     changedLines.add(currentLine + i);
                 }
                 currentLine += lineCount;
             } else if (change.removed) {
                 // These lines were removed from initial - don't advance currentLine
-                Logger.info(`    Removed: ${lineCount} lines (ignored in final)`);
+                Logger.debug(`    Removed: ${lineCount} lines (ignored in final)`);
                 // Don't increment currentLine since these don't exist in final
             } else {
                 // Unchanged lines - advance position but don't mark as changed
@@ -325,7 +325,7 @@ export class PasteDebugger {
 
         // Convert Set to sorted array
         const sortedLines = Array.from(changedLines).sort((a, b) => a - b);
-        Logger.info(`  → Grouping ${sortedLines.length} changed lines into ranges...`);
+        Logger.debug(`  → Grouping ${sortedLines.length} changed lines into ranges...`);
 
         // Group into contiguous ranges with smarter gap detection
         const ranges: Array<{ start: number; end: number }> = [];
@@ -371,14 +371,14 @@ export class PasteDebugger {
 
         // Don't forget the last range
         ranges.push({ start: rangeStart, end: rangeEnd });
-        Logger.info(`  → Grouped into ${ranges.length} contiguous ranges`);
+        Logger.debug(`  → Grouped into ${ranges.length} contiguous ranges`);
 
         // Expand ranges to semantic boundaries and track original vs expanded
-        Logger.info(`  → Expanding to semantic boundaries...`);
+        Logger.debug(`  → Expanding to semantic boundaries...`);
         const rangeMetadata: Array<{ original: { start: number; end: number } }> = [];
         const expandedRanges = ranges.map((range, idx) => {
             const expanded = this._expandToSemanticBoundaries(range, document);
-            Logger.info(`    Range ${idx}: [${range.start}-${range.end}] → [${expanded.start}-${expanded.end}]`);
+            Logger.debug(`    Range ${idx}: [${range.start}-${range.end}] → [${expanded.start}-${expanded.end}]`);
             rangeMetadata.push({ original: range }); // Store metadata separately
             return expanded;
         });
@@ -386,7 +386,7 @@ export class PasteDebugger {
         // Merge overlapping ranges to prevent duplicates
         const mergedRanges = this._mergeOverlappingRanges(expandedRanges);
         if (mergedRanges.length < expandedRanges.length) {
-            Logger.info(`  → Merged overlapping ranges: ${expandedRanges.length} → ${mergedRanges.length}`);
+            Logger.debug(`  → Merged overlapping ranges: ${expandedRanges.length} → ${mergedRanges.length}`);
         }
 
         // Create CodeBlock objects
@@ -427,7 +427,7 @@ export class PasteDebugger {
                         expandedContext: range.start !== originalRange.start || range.end !== originalRange.end
                     }
                 );
-                Logger.info(`    ✓ Registered block ${blockId} with UI (lines ${range.start}-${range.end}, core: ${originalRange.start}-${originalRange.end})`);
+                Logger.debug(`    ✓ Registered block ${blockId} with UI (lines ${range.start}-${range.end}, core: ${originalRange.start}-${originalRange.end})`);
             }
         }
 
@@ -669,7 +669,7 @@ export class PasteDebugger {
         };
 
         fs.writeFileSync(this._solutionPath, JSON.stringify(output, null, 2), 'utf-8');
-        Logger.info(`Saved ${this._blocks.length} blocks to solution file`);
+        Logger.debug(`Saved ${this._blocks.length} blocks to solution file`);
     }
 
     /**
@@ -678,7 +678,7 @@ export class PasteDebugger {
     public saveToFile(): void {
         this._saveDebug();
         this._saveSolution();
-        Logger.info(`Saved ${this._events.length} events and ${this._blocks.length} blocks`);
+        Logger.debug(`Saved ${this._events.length} events and ${this._blocks.length} blocks`);
     }
 
     /**

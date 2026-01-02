@@ -386,31 +386,37 @@ body {
     }
 }
 
-/* Subtle dismissing animation - fade and swipe */
+/* Smooth dismissing animation - elegant fade and slide */
 .segment-card.dismissing {
-    animation: subtleSwipeOut 0.25s ease-out forwards;
+    animation: smoothDismiss 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    pointer-events: none; /* Prevent interaction during animation */
 }
 
-@keyframes subtleSwipeOut {
+@keyframes smoothDismiss {
     0% {
-        transform: translateX(0);
+        transform: translateX(0) scale(1);
         opacity: 1;
         max-height: 500px;
         margin-bottom: 8px;
     }
-    60% {
-        transform: translateX(30%);
+    40% {
+        transform: translateX(8px) scale(0.98);
+        opacity: 0.7;
+    }
+    70% {
+        transform: translateX(40px) scale(0.95);
         opacity: 0;
         max-height: 500px;
         margin-bottom: 8px;
     }
     100% {
-        transform: translateX(30%);
+        transform: translateX(40px) scale(0.9);
         opacity: 0;
         max-height: 0;
         margin-bottom: 0;
         padding: 0;
         border: none;
+        overflow: hidden;
     }
 }
 
@@ -568,6 +574,119 @@ body {
     box-shadow: 0 0 0 0 var(--vscode-button-background);
 }
 
+/* DIFF badge - indicates segment has diff available */
+.diff-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    background: var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d);
+    color: var(--vscode-editor-background, #1e1e1e);
+    border-radius: 3px;
+    opacity: 0.9;
+}
+
+.diff-badge .codicon {
+    font-size: 10px;
+}
+
+/* TIME badge - shows relative timestamp in timeline view */
+.time-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    background: var(--vscode-badge-background, rgba(255, 255, 255, 0.1));
+    color: var(--vscode-badge-foreground, var(--vscode-descriptionForeground));
+    border-radius: 3px;
+    opacity: 0.8;
+}
+
+/* ========== Timeline View Styles ========== */
+
+/* Timeline order number */
+.timeline-order {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+/* Segment card in timeline view */
+.segment-card.timeline-view {
+    position: relative;
+}
+
+/* Flow indicator between segments */
+.flow-indicator {
+    display: flex;
+    align-items: center;
+    padding: 4px 0 4px 10px;
+    margin: 0 0 0 0;
+    position: relative;
+}
+
+.flow-indicator .flow-line {
+    position: absolute;
+    left: 22px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--vscode-panel-border);
+}
+
+.flow-indicator .flow-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    margin-left: 22px;
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    background: var(--vscode-editor-background);
+    border-radius: 12px;
+    border: 1px dashed var(--vscode-panel-border);
+}
+
+.flow-indicator .flow-label .codicon {
+    font-size: 12px;
+}
+
+/* Switch to new file indicator */
+.flow-indicator.flow-switch .flow-label {
+    color: var(--vscode-textLink-foreground);
+    border-color: var(--vscode-textLink-foreground);
+    opacity: 0.8;
+}
+
+.flow-indicator.flow-switch .flow-label .codicon {
+    color: var(--vscode-textLink-foreground);
+}
+
+/* Return to previous file indicator */
+.flow-indicator.flow-return .flow-label {
+    color: var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d);
+    border-color: var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d);
+    opacity: 0.9;
+}
+
+.flow-indicator.flow-return .flow-label .codicon {
+    color: var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d);
+}
+
 @keyframes badgePulse {
     0% {
         box-shadow: 0 0 0 0 rgba(var(--vscode-button-background), 0.7);
@@ -703,6 +822,22 @@ body {
 .action-icon-btn.reviewed-btn:hover {
     background: rgba(52, 199, 89, 0.15);
     color: rgb(52, 199, 89);
+}
+
+/* Footer star button - yellow styling */
+.action-icon-btn.footer-star-btn {
+    opacity: 0.6;
+}
+
+.action-icon-btn.footer-star-btn:hover {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    opacity: 1;
+}
+
+.action-icon-btn.footer-star-btn.starred {
+    color: #f59e0b;
+    opacity: 1;
 }
 
 .segment-actions {
@@ -1463,4 +1598,526 @@ body {
 
 .file-list-item:hover .file-list-item-action {
     opacity: 1;
+}
+
+/* ========== Code/Diff View Styles ========== */
+
+/* Only show spacing/border when section has content */
+.code-diff-section:not(:empty) {
+    margin-top: var(--space-xl);
+    border-top: 1px solid var(--vscode-panel-border);
+    padding-top: var(--space-xl);
+}
+
+/* ========== Code View (non-diff) - VS Code Editor Style ========== */
+.code-view {
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-editorWidget-border, var(--vscode-panel-border));
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.code-view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: var(--vscode-editorGroupHeader-tabsBackground);
+    border-bottom: 1px solid var(--vscode-editorGroupHeader-tabsBorder, var(--vscode-panel-border));
+    min-height: 32px;
+}
+
+.code-view-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--vscode-foreground);
+}
+
+.code-view-title .codicon {
+    font-size: 14px;
+    color: var(--vscode-descriptionForeground);
+}
+
+.code-view-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--vscode-tab-activeForeground, var(--vscode-foreground));
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.code-view-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.code-view-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    color: var(--vscode-descriptionForeground);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.code-view-action-btn:hover {
+    background: var(--vscode-toolbar-hoverBackground);
+    color: var(--vscode-foreground);
+}
+
+.code-view-action-btn .codicon {
+    font-size: 14px;
+}
+
+.code-view-content {
+    margin: 0;
+    padding: 0;
+    font-family: var(--vscode-editor-font-family, 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace);
+    font-size: var(--vscode-editor-font-size, 13px);
+    line-height: var(--vscode-editor-line-height, 20px);
+    overflow-x: auto;
+    tab-size: 4;
+}
+
+.code-view-content code {
+    font-family: inherit;
+    display: block;
+}
+
+/* Code lines with line numbers */
+.code-line {
+    display: flex;
+    align-items: stretch;
+    min-height: 20px;
+    min-width: fit-content; /* Ensures background extends with content */
+}
+
+.code-line:hover {
+    background: var(--vscode-editor-lineHighlightBackground, rgba(255, 255, 255, 0.04));
+}
+
+.code-line-gutter {
+    flex-shrink: 0;
+    width: 44px;
+    padding: 0 8px 0 0;
+    text-align: right;
+    color: var(--vscode-editorLineNumber-foreground);
+    background: var(--vscode-editorGutter-background, transparent);
+    user-select: none;
+    font-size: inherit;
+    line-height: inherit;
+    border-right: 1px solid var(--vscode-editorIndentGuide-background, transparent);
+}
+
+.code-line-content {
+    flex: 1;
+    padding: 0 12px 0 8px;
+    white-space: pre;
+    overflow-x: visible;
+    color: var(--vscode-editor-foreground);
+}
+
+/* Empty code view state */
+.code-view-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* ========== Diff View - VS Code Native Style ========== */
+.diff-view {
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-editorWidget-border, var(--vscode-panel-border));
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.diff-view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: var(--vscode-editorGroupHeader-tabsBackground);
+    border-bottom: 1px solid var(--vscode-editorGroupHeader-tabsBorder, var(--vscode-panel-border));
+    min-height: 32px;
+}
+
+.diff-view-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--vscode-foreground);
+}
+
+.diff-view-title .codicon {
+    font-size: 14px;
+    color: var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d);
+}
+
+.diff-view-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--vscode-tab-activeForeground, var(--vscode-foreground));
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.diff-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--vscode-editor-font-family, monospace);
+}
+
+.diff-stat-add,
+.diff-stat-remove {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.diff-stat-add {
+    background: var(--vscode-diffEditor-insertedLineBackground, rgba(35, 134, 54, 0.2));
+    color: var(--vscode-gitDecoration-addedResourceForeground, #3fb950);
+}
+
+.diff-stat-remove {
+    background: var(--vscode-diffEditor-removedLineBackground, rgba(248, 81, 73, 0.2));
+    color: var(--vscode-gitDecoration-deletedResourceForeground, #f85149);
+}
+
+.diff-view-content {
+    font-family: var(--vscode-editor-font-family, 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace);
+    font-size: var(--vscode-editor-font-size, 13px);
+    line-height: var(--vscode-editor-line-height, 20px);
+    overflow-x: auto;
+    tab-size: 4;
+}
+
+/* Diff line structure - mimics VS Code inline diff */
+.diff-line {
+    display: flex;
+    align-items: stretch;
+    min-height: 20px;
+    min-width: fit-content; /* Ensures background extends with content */
+}
+
+/* Gutter indicator column (+/-/space) */
+.diff-gutter-indicator {
+    flex-shrink: 0;
+    width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 11px;
+    user-select: none;
+}
+
+/* Line number columns */
+.diff-line-num {
+    flex-shrink: 0;
+    width: 40px;
+    padding: 0 6px;
+    text-align: right;
+    color: var(--vscode-editorLineNumber-foreground);
+    user-select: none;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.diff-line-num.old {
+    border-right: 1px solid var(--vscode-editorIndentGuide-background, rgba(255, 255, 255, 0.1));
+}
+
+.diff-line-num.new {
+    border-right: 1px solid var(--vscode-editorIndentGuide-background, rgba(255, 255, 255, 0.1));
+}
+
+/* Code content */
+.diff-content {
+    flex: 1;
+    padding: 0 12px 0 8px;
+    white-space: pre;
+    overflow-x: visible;
+    color: var(--vscode-editor-foreground);
+}
+
+/* ===== Removed/Deleted lines ===== */
+.diff-line.removed {
+    background-color: var(--vscode-diffEditor-removedLineBackground, rgba(248, 81, 73, 0.15));
+}
+
+.diff-line.removed .diff-gutter-indicator {
+    background-color: var(--vscode-diffEditorGutter-removedLineBackground, rgba(248, 81, 73, 0.3));
+    color: var(--vscode-gitDecoration-deletedResourceForeground, #f85149);
+}
+
+.diff-line.removed .diff-line-num {
+    background-color: var(--vscode-diffEditor-removedLineBackground, rgba(248, 81, 73, 0.1));
+    color: var(--vscode-editorLineNumber-foreground);
+}
+
+.diff-line.removed .diff-content {
+    background-color: transparent;
+}
+
+/* ===== Added/Inserted lines ===== */
+.diff-line.added {
+    background-color: var(--vscode-diffEditor-insertedLineBackground, rgba(35, 134, 54, 0.15));
+}
+
+.diff-line.added .diff-gutter-indicator {
+    background-color: var(--vscode-diffEditorGutter-insertedLineBackground, rgba(35, 134, 54, 0.3));
+    color: var(--vscode-gitDecoration-addedResourceForeground, #3fb950);
+}
+
+.diff-line.added .diff-line-num {
+    background-color: var(--vscode-diffEditor-insertedLineBackground, rgba(35, 134, 54, 0.1));
+    color: var(--vscode-editorLineNumber-foreground);
+}
+
+.diff-line.added .diff-content {
+    background-color: transparent;
+}
+
+/* ===== Context/Unchanged lines ===== */
+.diff-line.context {
+    background: transparent;
+}
+
+.diff-line.context:hover {
+    background: var(--vscode-editor-lineHighlightBackground, rgba(255, 255, 255, 0.04));
+}
+
+.diff-line.context .diff-gutter-indicator {
+    background: var(--vscode-editorGutter-background, transparent);
+    color: transparent;
+}
+
+.diff-line.context .diff-line-num {
+    background: var(--vscode-editorGutter-background, transparent);
+}
+
+.diff-line.context .diff-content {
+    background: transparent;
+}
+
+/* ===== Diff separator/hunk header ===== */
+.diff-hunk-header {
+    display: flex;
+    align-items: center;
+    padding: 4px 12px;
+    background: var(--vscode-diffEditor-diagonalFill, rgba(255, 255, 255, 0.05));
+    border-top: 1px solid var(--vscode-panel-border);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+}
+
+.diff-hunk-header .codicon {
+    margin-right: 6px;
+    font-size: 12px;
+}
+
+/* Diff button active state */
+.diff-btn.active {
+    background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+}
+
+.diff-btn.active:hover {
+    background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.diff-error {
+    padding: 16px;
+    color: var(--vscode-errorForeground);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.diff-error .codicon {
+    font-size: 14px;
+}
+
+/* Word-level diff highlighting within lines */
+.diff-word-add {
+    background-color: var(--vscode-diffEditor-insertedTextBackground, rgba(35, 134, 54, 0.4));
+    border-radius: 2px;
+}
+
+.diff-word-remove {
+    background-color: var(--vscode-diffEditor-removedTextBackground, rgba(248, 81, 73, 0.4));
+    border-radius: 2px;
+    text-decoration: line-through;
+    text-decoration-color: var(--vscode-gitDecoration-deletedResourceForeground, #f85149);
+}
+
+/* ========== File Group Styles (All Files View) ========== */
+
+.file-group {
+    margin-bottom: 8px;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--vscode-editor-background);
+}
+
+.file-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--vscode-sideBar-background);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.file-group-header:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.file-group-header:not(.collapsed) {
+    border-bottom-color: var(--vscode-panel-border);
+}
+
+.file-group-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.file-group-chevron {
+    font-size: 14px;
+    color: var(--vscode-foreground);
+    opacity: 0.7;
+    transition: transform 0.2s ease;
+}
+
+.file-group-icon {
+    font-size: 16px;
+    color: var(--vscode-textLink-foreground);
+    opacity: 0.9;
+}
+
+/* Session type specific icon colors */
+.file-group.session-start .file-group-icon {
+    color: var(--vscode-textLink-foreground);
+}
+
+.file-group.session-switch .file-group-icon {
+    color: var(--vscode-textLink-foreground);
+}
+
+.file-group.session-return .file-group-icon {
+    color: var(--vscode-gitDecoration-modifiedResourceForeground, #e2c08d);
+}
+
+.file-group-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-group-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    border-radius: 10px;
+}
+
+.file-group-header-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.file-group-collapse-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--vscode-descriptionForeground);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.15s ease;
+}
+
+.file-group-collapse-all-btn:hover {
+    background: var(--vscode-toolbar-hoverBackground);
+    opacity: 1;
+}
+
+.file-group-collapse-all-btn .codicon {
+    font-size: 14px;
+}
+
+/* File group content - collapsible container */
+.file-group-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    max-height: 5000px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease,
+                padding 0.3s ease;
+}
+
+.file-group-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 8px;
+}
+
+/* Nested segment cards within file groups */
+.file-group-content .segment-card {
+    margin: 0;
+}
+
+/* When file is collapsed, hide flow indicators */
+.file-group-content.collapsed .flow-indicator {
+    display: none;
 }

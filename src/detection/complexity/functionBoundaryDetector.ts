@@ -25,19 +25,19 @@ export class FunctionBoundaryDetector {
         const lines = sourceCode.split('\n');
         const boundaries: FunctionBoundary[] = [];
 
-        console.log('[BoundaryDetector] Detecting boundaries for functions:', functions.map(f => f.name));
+        // console.log('[BoundaryDetector] Detecting boundaries for functions:', functions.map(f => f.name));
 
         for (const func of functions) {
             const boundary = this.findFunctionBoundary(lines, func.name, language);
             if (boundary) {
-                console.log(`[BoundaryDetector] Found boundary for "${func.name}": lines ${boundary.startLine}-${boundary.endLine}`);
+                // console.log(`[BoundaryDetector] Found boundary for "${func.name}": lines ${boundary.startLine}-${boundary.endLine}`);
                 boundaries.push(boundary);
             } else {
-                console.warn(`[BoundaryDetector] Could not find boundary for function: ${func.name}`);
+                // console.warn(`[BoundaryDetector] Could not find boundary for function: ${func.name}`);
             }
         }
 
-        console.log('[BoundaryDetector] Final boundaries order:', boundaries.map(b => `${b.name}:${b.startLine}-${b.endLine}`));
+        // console.log('[BoundaryDetector] Final boundaries order:', boundaries.map(b => `${b.name}:${b.startLine}-${b.endLine}`));
         return boundaries;
     }
 
@@ -65,7 +65,7 @@ export class FunctionBoundaryDetector {
         lines: string[],
         functionName: string
     ): FunctionBoundary | null {
-        console.log(`[BoundaryDetector] Searching for Python function: "${functionName}"`);
+        // console.log(`[BoundaryDetector] Searching for Python function: "${functionName}"`);
 
         let startLine = -1;
         let baseIndentation = -1;
@@ -77,12 +77,12 @@ export class FunctionBoundaryDetector {
 
             // Log lines that start with "def " to see what's actually there
             if (trimmed.startsWith('def ')) {
-                console.log(`[BoundaryDetector] Line ${i}: ${trimmed}`);
+                // console.log(`[BoundaryDetector] Line ${i}: ${trimmed}`);
             }
 
             // Check if this is the function definition
             if (this.isFunctionDeclaration(trimmed, functionName, Language.Python)) {
-                console.log(`[BoundaryDetector] ✓ Found match for "${functionName}" at line ${i}`);
+                // console.log(`[BoundaryDetector] ✓ Found match for "${functionName}" at line ${i}`);
                 startLine = i;
                 // Get the indentation level of the def line
                 baseIndentation = line.length - line.trimStart().length;
@@ -121,7 +121,7 @@ export class FunctionBoundaryDetector {
         }
 
         // Function not found
-        console.warn(`[BoundaryDetector] ✗ Could not find Python function: "${functionName}"`);
+        // console.warn(`[BoundaryDetector] ✗ Could not find Python function: "${functionName}"`);
         return null;
     }
 

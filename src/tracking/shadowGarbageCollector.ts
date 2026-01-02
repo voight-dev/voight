@@ -21,7 +21,7 @@ export class ShadowGarbageCollector {
     ) {
         this._changeDetector = changeDetector;
         this._metadataManager = metadataManager;
-        Logger.info('ShadowGarbageCollector initialized');
+        Logger.debug('ShadowGarbageCollector initialized');
     }
 
     /**
@@ -34,7 +34,7 @@ export class ShadowGarbageCollector {
             return;
         }
 
-        Logger.info(`Starting GC: interval=${this.GC_INTERVAL_MS / 60000}min, retention=${this.RETENTION_PERIOD_MS / 60000}min`);
+        Logger.debug(`Starting GC: interval=${this.GC_INTERVAL_MS / 60000}min, retention=${this.RETENTION_PERIOD_MS / 60000}min`);
 
         // Run initial GC after a delay to let extension initialize
         setTimeout(() => {
@@ -54,7 +54,7 @@ export class ShadowGarbageCollector {
         if (this._intervalHandle) {
             clearInterval(this._intervalHandle);
             this._intervalHandle = undefined;
-            Logger.info('GC stopped');
+            Logger.debug('GC stopped');
         }
     }
 
@@ -111,7 +111,7 @@ export class ShadowGarbageCollector {
                 memoryFreed += shadowSize;
 
                 const inactiveMinutes = Math.round(timeSinceLastEdit / 60000);
-                Logger.info(`✓ Removed shadow for ${filePath} (inactive for ${inactiveMinutes}min, freed ${this._formatBytes(shadowSize)})`);
+                Logger.debug(`✓ Removed shadow for ${filePath} (inactive for ${inactiveMinutes}min, freed ${this._formatBytes(shadowSize)})`);
             } else {
                 const remainingMinutes = Math.round((this.RETENTION_PERIOD_MS - timeSinceLastEdit) / 60000);
                 Logger.debug(`Keeping ${filePath} (will be eligible for GC in ${remainingMinutes}min)`);
@@ -125,10 +125,10 @@ export class ShadowGarbageCollector {
         await this._metadataManager.saveToWorkspace();
 
         const duration = Date.now() - startTime;
-        Logger.info(`Active shadows after GC: ${this._changeDetector.getShadowCount()}`);
-        Logger.info(`Total memory after GC: ${this._formatBytes(this._changeDetector.getTotalMemoryUsage())}`);
-        Logger.info(`GC Complete: removed ${shadowsRemoved} shadows, freed ${this._formatBytes(memoryFreed)} in ${duration}ms`);
-        Logger.info(`=== Garbage Collection Complete ===\n`);
+        Logger.debug(`Active shadows after GC: ${this._changeDetector.getShadowCount()}`);
+        Logger.debug(`Total memory after GC: ${this._formatBytes(this._changeDetector.getTotalMemoryUsage())}`);
+        Logger.debug(`GC Complete: removed ${shadowsRemoved} shadows, freed ${this._formatBytes(memoryFreed)} in ${duration}ms`);
+        Logger.debug(`=== Garbage Collection Complete ===\n`);
 
         // Log analytics summary
         const analytics = this._metadataManager.getAnalyticsSummary();

@@ -207,7 +207,7 @@ export class VscodeWorkspaceRepository implements IContextNotesRepository {
         }
 
         await this._persist();
-        Logger.info(`Imported ${this._notesByFile.size} files with context notes`);
+        Logger.debug(`Imported ${this._notesByFile.size} files with context notes`);
     }
 
     /**

@@ -6,6 +6,8 @@ import { BlockManager } from '../ui/blockManager';
 import { DebugLogger } from '../debug/debugLogger';
 import { FilePatternMatcher } from '../utils/filePatternMatcher';
 import { FileRegistry } from '../tracking/fileRegistry';
+import { StalenessValidator } from './stalenessValidator';
+import { hashContent, getContentAtLines } from '../utils/contentHash';
 
 /**
  * Coordinates detection, UI updates, and debug logging
@@ -18,6 +20,7 @@ export class DetectionCoordinator {
     private _debugLogger?: DebugLogger;
     private _filePatternMatcher: FilePatternMatcher;
     private _fileRegistry: FileRegistry;
+    private _stalenessValidator?: StalenessValidator;
 
     constructor(
         fileRegistry: FileRegistry,
@@ -31,7 +34,12 @@ export class DetectionCoordinator {
         this._filePatternMatcher = new FilePatternMatcher();
         this._fileRegistry = fileRegistry;
 
-        Logger.info('DetectionCoordinator initialized');
+        // Initialize staleness validator if block manager is available
+        if (blockManager) {
+            this._stalenessValidator = new StalenessValidator(blockManager);
+        }
+
+        Logger.debug('DetectionCoordinator initialized');
     }
 
     /**
@@ -56,11 +64,11 @@ export class DetectionCoordinator {
             // File existed at startup - initialize shadow state to current content
             // This prevents treating existing file content as AI-generated
             this._changeDetector.initializeDocument(document);
-            Logger.info(`DetectionCoordinator: Initialized tracking for existing file: ${document.fileName}`);
+            Logger.debug(`DetectionCoordinator: Initialized tracking for existing file: ${document.fileName}`);
         } else {
             // File was NOT in workspace at startup - this is a NEW file
             // Process it as AI-generated content
-            Logger.info(`DetectionCoordinator: NEW FILE opened - will process entire content: ${document.fileName}`);
+            Logger.debug(`DetectionCoordinator: NEW FILE opened - will process entire content: ${document.fileName}`);
             this.handleNewFileCreated(document);
         }
     }
@@ -82,9 +90,9 @@ export class DetectionCoordinator {
             return;
         }
 
-        Logger.info(`\n=== Document Change Event ===`);
-        Logger.info(`File: ${filePath}`);
-        Logger.info(`Total chunks: ${event.contentChanges.length}`);
+        Logger.debug(`\n=== Document Change Event ===`);
+        Logger.debug(`File: ${filePath}`);
+        Logger.debug(`Total chunks: ${event.contentChanges.length}`);
 
         // Log details about each change chunk
         event.contentChanges.forEach((change, idx) => {
@@ -106,11 +114,28 @@ export class DetectionCoordinator {
         }
 
         if (!isPaste) {
-            Logger.info(`NOT detected as paste operation - skipping block detection`);
+            Logger.debug(`NOT detected as paste operation - skipping block detection`);
+
+            // For non-paste edits, check for stale segments
+            if (this._stalenessValidator && this._blockManager) {
+                const changedLines = StalenessValidator.getChangedLines(event.contentChanges);
+                if (changedLines.size > 0) {
+                    const results = this._stalenessValidator.validateAndCleanup(
+                        filePath,
+                        event.document,
+                        changedLines
+                    );
+                    const staleCount = results.filter(r => r.isStale).length;
+                    if (staleCount > 0) {
+                        Logger.debug(`[StalenessValidator] Removed ${staleCount} stale segments`);
+                    }
+                }
+            }
+
             return;
         }
 
-        Logger.info('PASTE DETECTED - analyzing changes...');
+        Logger.debug('PASTE DETECTED - analyzing changes...');
 
         // Detect changed blocks
         const blocks = this._changeDetector.detectChanges(event.document);
@@ -120,11 +145,18 @@ export class DetectionCoordinator {
             return;
         }
 
-        Logger.info(`Detected ${blocks.length} code blocks`);
+        Logger.debug(`Detected ${blocks.length} code blocks`);
+
+        // Get document lines for content hash calculation
+        const documentLines = event.document.getText().split('\n');
 
         // Register with UI
         if (this._blockManager) {
             blocks.forEach((block, idx) => {
+                // Calculate content hash for staleness detection
+                const contentAtLines = getContentAtLines(documentLines, block.startLine, block.endLine);
+                const contentHash = hashContent(contentAtLines);
+
                 const blockId = this._blockManager!.registerDetectedBlock(
                     filePath,
                     block.startLine,
@@ -138,10 +170,12 @@ export class DetectionCoordinator {
                         expandedContext: block.expandedContext,
                         complexityScore: block.complexityScore,
                         complexityData: block.complexityData,
-                        functions: block.functions
+                        functions: block.functions,
+                        beforeCode: block.beforeCode,
+                        contentHash: contentHash  // For staleness detection
                     }
                 );
-                Logger.debug(`  ✓ Registered ${blockId} with UI`);
+                Logger.debug(`  ✓ Registered ${blockId} with UI (hash: ${contentHash})`);
             });
         }
 
@@ -151,6 +185,63 @@ export class DetectionCoordinator {
         }
 
         Logger.debug(`=== Event Complete ===\n`);
+    }
+
+    /**
+     * Validate all persisted segments against current file contents
+     * Called at startup to clean up stale segments from previous sessions
+     */
+    public async validateAllSegments(): Promise<{ validated: number; removed: number }> {
+        if (!this._blockManager || !this._stalenessValidator) {
+            return { validated: 0, removed: 0 };
+        }
+
+        const allSegments = this._blockManager.getAllBlocks();
+        if (allSegments.length === 0) {
+            return { validated: 0, removed: 0 };
+        }
+
+        Logger.debug(`[StalenessValidator] Validating ${allSegments.length} persisted segments at startup...`);
+
+        // Group segments by file
+        const segmentsByFile = new Map<string, typeof allSegments>();
+        for (const segment of allSegments) {
+            const existing = segmentsByFile.get(segment.filePath) || [];
+            existing.push(segment);
+            segmentsByFile.set(segment.filePath, existing);
+        }
+
+        let totalRemoved = 0;
+
+        // Validate each file's segments
+        for (const [filePath, _segments] of segmentsByFile) {
+            try {
+                // Try to open the document
+                const uri = vscode.Uri.file(filePath);
+                const document = await vscode.workspace.openTextDocument(uri);
+
+                const results = this._stalenessValidator.validateAndCleanup(
+                    filePath,
+                    document
+                );
+
+                const staleCount = results.filter(r => r.isStale).length;
+                totalRemoved += staleCount;
+            } catch (error) {
+                // File might not exist anymore - remove all segments for it
+                Logger.warn(`[StalenessValidator] File not found, removing segments: ${filePath}`);
+                this._blockManager.removeSegmentsForFile(filePath);
+                totalRemoved += _segments.length;
+            }
+        }
+
+        if (totalRemoved > 0) {
+            Logger.debug(`[StalenessValidator] Startup validation complete: removed ${totalRemoved} stale segments`);
+        } else {
+            Logger.debug(`[StalenessValidator] Startup validation complete: all segments valid`);
+        }
+
+        return { validated: allSegments.length, removed: totalRemoved };
     }
 
     /**
@@ -180,9 +271,9 @@ export class DetectionCoordinator {
     public handleNewFileCreated(document: vscode.TextDocument): void {
         const filePath = document.fileName;
 
-        Logger.info(`\n=== New File Created on Disk ===`);
-        Logger.info(`File: ${filePath}`);
-        Logger.info(`Lines: ${document.lineCount}`);
+        Logger.debug(`\n=== New File Created on Disk ===`);
+        Logger.debug(`File: ${filePath}`);
+        Logger.debug(`Lines: ${document.lineCount}`);
 
         // Check if file should be excluded (handles dotfiles and patterns)
         if (this._filePatternMatcher.shouldExclude(filePath)) {
@@ -197,7 +288,7 @@ export class DetectionCoordinator {
             return;
         }
 
-        Logger.info(`NEW FILE DETECTED - ${filePath}`);
+        Logger.debug(`NEW FILE DETECTED - ${filePath}`);
 
         // 1. Register as known so future edits are tracked normally
         this._fileRegistry.register(filePath);
@@ -205,12 +296,12 @@ export class DetectionCoordinator {
         // 2. Initialize shadow state with CURRENT content as baseline
         //    Future edits will diff against this baseline
         this._changeDetector.initializeDocument(document);
-        Logger.info(`Shadow state initialized for new file (baseline = current content)`);
+        Logger.debug(`Shadow state initialized for new file (baseline = current content)`);
 
         // 3. DO NOT create segments - let user read entire file
         //    No segments, no UI registration, just tracking setup
-        Logger.info(`No segments created for new file - user should review entire file manually`);
-        Logger.info(`Future edits to this file will be detected normally`);
+        Logger.debug(`No segments created for new file - user should review entire file manually`);
+        Logger.debug(`Future edits to this file will be detected normally`);
 
         // 4. Notify user with action to open file
         const fileName = filePath.split('/').pop() || filePath;
@@ -225,7 +316,7 @@ export class DetectionCoordinator {
             }
         });
 
-        Logger.info(`=== File Processing Complete ===\n`);
+        Logger.debug(`=== File Processing Complete ===\n`);
     }
 
     /**

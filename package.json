@@ -1,15 +1,44 @@
 {
   "name": "voight",
-  "displayName": "voight",
+  "displayName": "Voight",
   "description": "Ensures human intent drives AI generation, bridging the gap between speed and understanding.",
   "version": "0.0.1",
+  "publisher": "voight-dev",
+  "license": "MIT",
+  "author": {
+    "name": "Voight Dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/voight-dev/voight"
+  },
+  "bugs": {
+    "url": "https://github.com/voight-dev/voight/issues"
+  },
+  "homepage": "https://voight.dev",
+  "icon": "resources/icon.png",
+  "keywords": [
+    "ai",
+    "code-detection",
+    "code-review",
+    "productivity",
+    "code-analysis",
+    "ai-assisted",
+    "paste-detection",
+    "code-tracking",
+    "gemini",
+    "anthropic",
+    "openai"
+  ],
   "engines": {
     "vscode": "^1.106.1"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -172,9 +201,9 @@
           "default": "gemini",
           "description": "AI provider for code explanation",
           "enumDescriptions": [
-            "Google Gemini (gemini-1.5-pro)",
-            "Anthropic Claude (claude-3-5-sonnet-20241022)",
-            "OpenAI GPT (gpt-4-turbo-preview)"
+            "Google Gemini (gemini-2.0-flash)",
+            "Anthropic Claude (claude-sonnet-4-20250514)",
+            "OpenAI GPT (gpt-4o)"
           ]
         },
         "voight.ai.apiKey": {
@@ -185,7 +214,7 @@
         "voight.ai.model": {
           "type": "string",
           "default": "",
-          "description": "Model to use (optional, defaults to provider's default: gemini-1.5-pro, claude-3-5-sonnet-20241022, or gpt-4-turbo-preview)"
+          "description": "Model to use (optional, defaults to provider's default: gemini-2.0-flash, claude-sonnet-4-20250514, or gpt-4o)"
         },
         "voight.ai.maxTokens": {
           "type": "number",

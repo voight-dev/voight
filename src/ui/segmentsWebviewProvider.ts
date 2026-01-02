@@ -15,6 +15,10 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'voight.segmentsView';
     private _view?: vscode.WebviewView;
     private _lastViewedFilePath?: string; // Persist which file's segments we're showing
+    private _showAllFiles: boolean = false; // Show segments from all files (for timeline view)
+    private _isNavigatingProgrammatically: boolean = false; // Track programmatic navigation to preserve All Files mode
+    private _currentSortMode: string = 'line'; // Track sort mode (line, complexity, time) to persist across updates
+    private _lastProgrammaticNavigationTime: number = 0; // Timestamp of last programmatic navigation for debouncing
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -131,8 +135,10 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
                                 this._blockManager.remove(message.segmentId);
                                 Logger.debug(`Segment ${message.segmentId} removed completely`);
                             }
+                        } else {
+                            Logger.debug(`Segment ${message.segmentId} not found in blockManager - already removed`);
                         }
-                        // Update badge in real-time after dismissal
+                        // Update badge immediately and schedule verification
                         this._updateBadge();
                         // Don't call _updateSegments() here - frontend handles UI removal
                     }
@@ -142,7 +148,7 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
                     // Force remove segment completely, regardless of star or context
                     if (message.segmentId) {
                         this._blockManager.remove(message.segmentId);
-                        // Update badge in real-time after removal
+                        // Update badge immediately and schedule verification
                         this._updateBadge();
                         // Don't call _updateSegments() here - frontend handles UI removal
                     }
@@ -183,12 +189,34 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
                         await vscode.window.showTextDocument(uri);
                         // Set this as the last viewed file so segments persist
                         this._lastViewedFilePath = message.filePath;
+                        // Reset all files mode when selecting a specific file
+                        this._showAllFiles = false;
+                    }
+                    break;
+
+                case 'showAllFiles':
+                    Logger.debug('[SegmentsWebviewProvider] Showing all files');
+                    this._showAllFiles = true;
+                    this._updateSegments();
+                    this._updateBadge();
+                    break;
+
+                case 'setSortMode':
+                    if (message.sortMode) {
+                        Logger.debug(`[SegmentsWebviewProvider] Sort mode changed to: ${message.sortMode}`);
+                        this._currentSortMode = message.sortMode;
                     }
                     break;
 
                 case 'goToSegment':
                     if (message.filePath && message.startLine !== undefined && message.endLine !== undefined) {
                         Logger.debug(`[SegmentsWebviewProvider] Navigating to segment: ${message.filePath}:${message.startLine}-${message.endLine}`);
+
+                        // Mark as programmatic navigation to preserve "All Files" mode
+                        // Use both a flag AND a timestamp for robustness against multiple editor change events
+                        this._isNavigatingProgrammatically = true;
+                        this._lastProgrammaticNavigationTime = Date.now();
+
                         const uri = vscode.Uri.file(message.filePath);
                         const document = await vscode.workspace.openTextDocument(uri);
                         const editor = await vscode.window.showTextDocument(document);
@@ -228,7 +256,7 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
 
                         // Update badge after bulk removal
                         this._updateBadge();
-                        Logger.info(`[SegmentsWebviewProvider] Bulk removal complete`);
+                        Logger.debug(`[SegmentsWebviewProvider] Bulk removal complete`);
                     }
                     break;
             }
@@ -244,7 +272,30 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
         // Update segments when active editor changes (user switches files)
         vscode.window.onDidChangeActiveTextEditor(() => {
             Logger.debug('[SegmentsWebviewProvider] Active editor changed, updating segments');
+
+            // Check if this is within the grace period of a programmatic navigation
+            // This handles cases where multiple editor change events fire for a single navigation
+            const timeSinceLastNavigation = Date.now() - this._lastProgrammaticNavigationTime;
+            const isWithinNavigationGracePeriod = timeSinceLastNavigation < 500; // 500ms grace period
+
+            Logger.debug(`[SegmentsWebviewProvider] _isNavigatingProgrammatically: ${this._isNavigatingProgrammatically}, isWithinNavigationGracePeriod: ${isWithinNavigationGracePeriod}, _showAllFiles: ${this._showAllFiles}, _currentSortMode: ${this._currentSortMode}`);
+
+            // Only reset "All Files" mode when user MANUALLY switches files
+            // Preserve it when:
+            // 1. Navigating programmatically (e.g., auto-advance) - flag or within grace period
+            // 2. In timeline view mode (sort by time) - user is reviewing the edit timeline
+            const shouldPreserveAllFilesMode =
+                this._isNavigatingProgrammatically ||
+                isWithinNavigationGracePeriod ||
+                (this._showAllFiles && this._currentSortMode === 'time');
+
+            if (!shouldPreserveAllFilesMode) {
+                this._showAllFiles = false;
+            }
+            this._isNavigatingProgrammatically = false; // Reset flag after handling
+
             this._updateSegments();
+            this._updateBadge();
         });
 
         // Update highlighted segment when cursor position changes
@@ -264,6 +315,36 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
     }
 
     /**
+     * Get the actual unseen segment count by querying the block manager
+     */
+    private _getUnseenCount(): number {
+        const allBlocks = this._blockManager.getAllBlocks();
+        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));
+
+        const unseenBlocks = blocks.filter((block: HighlightSegment) => {
+            // Dismissed or reviewed = seen
+            if (block.state === SegmentState.REVIEWED || block.state === SegmentState.DISMISSED) {
+                return false;
+            }
+            // Starred = seen
+            if (block.metadata?.isStarred === true) {
+                return false;
+            }
+            // Has context = seen
+            if (block.metadata?.context && block.metadata.context.trim().length > 0) {
+                return false;
+            }
+            // Has AI explanation = seen
+            if (block.metadata?.explanation && block.metadata.explanation.trim().length > 0) {
+                return false;
+            }
+            return true;
+        });
+
+        return unseenBlocks.length;
+    }
+
+    /**
      * Update the badge count on the Activity Bar icon
      * Shows count of unseen segments (not interacted with yet)
      */
@@ -272,49 +353,74 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             return;
         }
 
-        // Filter out segments from deleted files
-        const allBlocks = this._blockManager.getAllBlocks();
-        const blocks = allBlocks.filter(block => this._fileRegistry.isKnown(block.filePath));
+        const unseenCount = this._getUnseenCount();
+        this._setBadgeValue(unseenCount);
 
-        // Count segments that haven't been interacted with yet
-        // A segment is "seen" if ANY of these conditions are true:
-        // - Reviewed or dismissed
-        // - Starred
-        // - Has context notes
-        // - Has AI explanation
-        const unseenCount = blocks.filter((block: HighlightSegment) => {
-            // Dismissed or reviewed = seen
-            if (block.state === SegmentState.REVIEWED || block.state === SegmentState.DISMISSED) {
-                return false;
-            }
+        // Start enforcement to work around VSCode badge caching issues
+        this._startBadgeEnforcement();
+    }
 
-            // Starred = seen
-            if (block.metadata?.isStarred === true) {
-                return false;
-            }
+    /**
+     * Set the badge to a specific value
+     */
+    private _setBadgeValue(count: number) {
+        if (!this._view) {
+            return;
+        }
 
-            // Has context = seen
-            if (block.metadata?.context && block.metadata.context.trim().length > 0) {
-                return false;
-            }
-
-            // Has AI explanation = seen
-            if (block.metadata?.explanation && block.metadata.explanation.trim().length > 0) {
-                return false;
-            }
-
-            // Not interacted with = unseen
-            return true;
-        }).length;
-
-        if (unseenCount > 0) {
+        if (count > 0) {
             this._view.badge = {
-                tooltip: `${unseenCount} unseen segment${unseenCount !== 1 ? 's' : ''}`,
-                value: unseenCount
+                tooltip: `${count} unseen segment${count !== 1 ? 's' : ''}`,
+                value: count
             };
         } else {
+            // Force clear: set to dummy value first, then undefined
+            // This works around VSCode badge caching issues
+            this._view.badge = { value: 0, tooltip: '' };
             this._view.badge = undefined;
         }
+    }
+
+    private _badgeEnforcementInterval: NodeJS.Timeout | undefined;
+
+    /**
+     * Start a continuous badge enforcement for a short period
+     * This forces the badge to stay at the correct value even if VSCode has UI caching issues
+     */
+    private _startBadgeEnforcement() {
+        // Clear any existing enforcement
+        if (this._badgeEnforcementInterval) {
+            clearInterval(this._badgeEnforcementInterval);
+        }
+
+        const startTime = Date.now();
+        const enforcementDuration = 3000; // Enforce for 3 seconds
+
+        this._badgeEnforcementInterval = setInterval(() => {
+            if (Date.now() - startTime > enforcementDuration) {
+                if (this._badgeEnforcementInterval) {
+                    clearInterval(this._badgeEnforcementInterval);
+                    this._badgeEnforcementInterval = undefined;
+                }
+                return;
+            }
+
+            // Re-apply the correct badge value
+            if (!this._view) {
+                return;
+            }
+
+            const count = this._getUnseenCount();
+            if (count > 0) {
+                this._view.badge = {
+                    tooltip: `${count} unseen segment${count !== 1 ? 's' : ''}`,
+                    value: count
+                };
+            } else {
+                this._view.badge = { value: 0, tooltip: '' };
+                this._view.badge = undefined;
+            }
+        }, 200);
     }
 
     /**
@@ -435,7 +541,11 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
 
         let shouldShowFileList = false;
 
-        if (activeFilePath) {
+        // Check if we're in "All Files" mode
+        if (this._showAllFiles) {
+            Logger.debug('[SegmentsWebviewProvider] All Files mode active');
+            fileToShow = '__all__'; // Special marker for all files
+        } else if (activeFilePath) {
             // Check if active file has any segments
             const activeFileHasSegments = blocks.some(block => block.filePath === activeFilePath);
 
@@ -483,11 +593,15 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             return;
         }
 
-        // Filter: Show all segments from the file we're displaying, except reviewed/dismissed ones
-        // Exception: Always show starred or segments with context notes
+        // Filter: Show segments based on mode
+        // In "All Files" mode, show all segments from all files
+        // Otherwise, show segments from the file we're displaying
+        // Exception: Always show starred or segments with context notes, hide reviewed/dismissed
+        const isAllFilesMode = fileToShow === '__all__';
+
         const filteredBlocks = blocks.filter((block: HighlightSegment) => {
-            // Only show segments from the file we're displaying
-            if (block.filePath !== fileToShow) {
+            // In single file mode, only show segments from the file we're displaying
+            if (!isAllFilesMode && block.filePath !== fileToShow) {
                 return false;
             }
 
@@ -542,6 +656,7 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             endLine: block.endLine + 1,
             complexity: this._getComplexity(block),
             state: block.state,
+            code: this._getCodeForBlock(block), // Add current code
             metadata: block.metadata
         }));
 
@@ -549,7 +664,9 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             command: 'updateSegments',
             segments,
             files: allFiles,
-            currentFile: activeFilePath
+            currentFile: isAllFilesMode ? '__all__' : activeFilePath,
+            sortMode: this._currentSortMode, // Preserve sort mode across updates
+            showAllFiles: this._showAllFiles // Preserve "All Files" mode state
         });
     }
 
@@ -630,6 +747,24 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
     }
 
     /**
+     * Get current code content for a block
+     */
+    private _getCodeForBlock(block: HighlightSegment): string {
+        try {
+            const fs = require('fs');
+            const content = fs.readFileSync(block.filePath, 'utf8');
+            const lines = content.split('\n');
+
+            // Extract lines for this block (0-indexed)
+            const blockLines = lines.slice(block.startLine, block.endLine + 1);
+            return blockLines.join('\n');
+        } catch (error) {
+            Logger.debug(`Failed to read code for block ${block.id}: ${error}`);
+            return '';
+        }
+    }
+
+    /**
      * Handle explaining a segment with AI
      */
     private async _handleExplainSegment(segmentId: string): Promise<void> {
@@ -682,7 +817,7 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             // Detect language from file extension
             const language = this._detectLanguage(block.filePath);
 
-            Logger.info(`[SegmentsWebviewProvider] Explaining segment ${segmentId} (${language})`);
+            Logger.debug(`[SegmentsWebviewProvider] Explaining segment ${segmentId} (${language})`);
 
             // Get explanation from AI
             const explanation = await provider.explain(code, language);
@@ -705,7 +840,7 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
                 explanation
             });
 
-            Logger.info(`[SegmentsWebviewProvider] Explanation generated successfully`);
+            Logger.debug(`[SegmentsWebviewProvider] Explanation generated successfully`);
 
         } catch (error) {
             Logger.error(`[SegmentsWebviewProvider] Explanation error: ${error}`);
@@ -805,6 +940,9 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
                         </button>
                         <button class="sort-button" data-sort="complexity" title="Sort by complexity">
                             <span class="codicon codicon-graph"></span>
+                        </button>
+                        <button class="sort-button" data-sort="time" title="Sort by edit timeline">
+                            <span class="codicon codicon-history"></span>
                         </button>
                     </div>
                 </div>

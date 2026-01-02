@@ -12,7 +12,7 @@ export class FileRegistry {
      * Initialize registry with all files currently in the workspace
      */
     async initialize(workspaceRoot: string): Promise<void> {
-        Logger.info('FileRegistry: Scanning workspace for existing files...');
+        Logger.debug('FileRegistry: Scanning workspace for existing files...');
 
         // Find all files in workspace (excluding common ignore patterns)
         const files = await vscode.workspace.findFiles(
@@ -25,7 +25,7 @@ export class FileRegistry {
             this._knownFiles.add(file.fsPath);
         });
 
-        Logger.info(`FileRegistry: Registered ${this._knownFiles.size} existing files`);
+        Logger.debug(`FileRegistry: Registered ${this._knownFiles.size} existing files`);
     }
 
     /**

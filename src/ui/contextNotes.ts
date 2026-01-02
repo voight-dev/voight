@@ -257,7 +257,7 @@ export class ContextNotesManager {
         const firstValue = Object.values(stored)[0];
         if (firstValue && 'segmentId' in firstValue && !('filePath' in firstValue)) {
             // Old format detected - needs migration
-            Logger.info('Migrating old context notes format...');
+            Logger.debug('Migrating old context notes format...');
 
             // Back up old notes
             this._context.workspaceState.update(oldStorageKey, stored);

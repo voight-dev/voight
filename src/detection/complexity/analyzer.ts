@@ -129,8 +129,7 @@ export class ComplexityAnalyzer {
         try {
             // Try Phase 2: function-level detection
             return this.analyzeFunctionLevel(sourceCode);
-        } catch (error) {
-            console.warn('Function detection failed, falling back to aggregate analysis:', error);
+        } catch {
             // Fallback to Phase 1: aggregate analysis
             return this.analyzeAggregate(sourceCode);
         }

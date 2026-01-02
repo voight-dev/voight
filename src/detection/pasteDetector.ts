@@ -21,7 +21,6 @@ export class PasteDetector {
 
         // Heuristic 1: Large insertions are usually pastes
         if (textLength > 50) {
-            Logger.debug(`  → Paste detected: large insertion (${textLength} chars)`);
             return true;
         }
 
@@ -29,20 +28,17 @@ export class PasteDetector {
         if (text.includes('\n')) {
             const lineCount = (text.match(/\n/g) || []).length + 1;
             if (lineCount >= 2) {
-                Logger.debug(`  → Paste detected: multi-line (${lineCount} lines)`);
                 return true;
             }
         }
 
         // Heuristic 3: Instant changes (< 10ms) after previous change
         if (timeDelta < 10 && textLength > 5) {
-            Logger.debug(`  → Paste detected: rapid succession (${timeDelta}ms)`);
             return true;
         }
 
         // Heuristic 4: Complete statements (imports, requires, etc.)
         if (this._looksLikeCompleteStatement(text) && textLength >= 10) {
-            Logger.debug(`  → Paste detected: complete statement`);
             return true;
         }
 

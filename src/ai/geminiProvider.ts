@@ -1,11 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AIProvider, AIProviderConfig } from './aiProvider';
 
+// Default model for Gemini - using Gemini 2.0 Flash (fast and capable)
+const DEFAULT_MODEL = 'gemini-2.0-flash';
+
 export class GeminiProvider implements AIProvider {
     name = 'gemini';
     private client: GoogleGenerativeAI | null = null;
     private config: AIProviderConfig;
-    private cachedModelName: string | null = null;
 
     constructor(config: AIProviderConfig) {
         this.config = config;
@@ -18,78 +20,8 @@ export class GeminiProvider implements AIProvider {
         return !!this.config.apiKey;
     }
 
-    /**
-     * Get an available model name by querying the API
-     */
-    private async getAvailableModel(): Promise<string> {
-        if (!this.client) {
-            throw new Error('Gemini client not initialized');
-        }
-
-        // If user specified a model, use it
-        if (this.config.model) {
-            return this.config.model;
-        }
-
-        // If we cached a model name, reuse it
-        if (this.cachedModelName) {
-            return this.cachedModelName;
-        }
-
-        try {
-            // Fetch available models from the API
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models?key=${this.config.apiKey}`
-            );
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch models: ${response.statusText}`);
-            }
-
-            const data = await response.json() as { models?: any[] };
-            const models = data.models || [];
-
-            // Filter models that support generateContent
-            const textModels = models.filter((model: any) =>
-                model.supportedGenerationMethods?.includes('generateContent') &&
-                !model.name.includes('image') &&
-                !model.name.includes('embedding') &&
-                !model.name.includes('tts') &&
-                !model.name.includes('aqa')
-            );
-
-            if (textModels.length === 0) {
-                throw new Error('No suitable models found');
-            }
-
-            // Prioritize models by preference
-            const preferredOrder = [
-                'gemini-2.5-flash',      // Latest stable flash
-                'gemini-flash-latest',   // Latest flash alias
-                'gemini-2.0-flash',      // 2.0 flash
-                'gemini-2.5-pro',        // Latest stable pro
-                'gemini-pro-latest',     // Latest pro alias
-            ];
-
-            // Try to find a preferred model
-            for (const preferred of preferredOrder) {
-                const found = textModels.find((m: any) => m.name.includes(preferred));
-                if (found) {
-                    this.cachedModelName = found.name;
-                    return found.name;
-                }
-            }
-
-            // If no preferred model found, use the first available text model
-            this.cachedModelName = textModels[0].name;
-            return textModels[0].name;
-
-        } catch (error) {
-            // Fallback to a safe default if API call fails
-            console.warn('Failed to fetch Gemini models, using fallback:', error);
-            this.cachedModelName = 'gemini-pro';
-            return 'gemini-pro';
-        }
+    getDefaultModel(): string {
+        return DEFAULT_MODEL;
     }
 
     async explain(code: string, language: string): Promise<string> {
@@ -97,7 +29,8 @@ export class GeminiProvider implements AIProvider {
             throw new Error('Gemini API key not configured');
         }
 
-        const modelName = await this.getAvailableModel();
+        // Use user-specified model or default
+        const modelName = this.config.model || DEFAULT_MODEL;
         const model = this.client.getGenerativeModel({
             model: modelName
         });

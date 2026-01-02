@@ -153,7 +153,7 @@ export class DebugLogger {
             // Save events
             const eventsJson = JSON.stringify(this._events, null, 2);
             fs.writeFileSync(this._outputPath, eventsJson, 'utf-8');
-            Logger.info(`DebugLogger: Saved ${this._events.length} events to ${this._outputPath}`);
+            Logger.debug(`DebugLogger: Saved ${this._events.length} events to ${this._outputPath}`);
 
             // Solution is saved incrementally via _saveSolution()
         } catch (error) {

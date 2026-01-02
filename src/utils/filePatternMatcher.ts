@@ -50,7 +50,7 @@ export class FilePatternMatcher {
             }
         }
 
-        Logger.info(`[FilePatternMatcher] Loaded ${this.globPatterns.length} glob patterns and ${this.regexPatterns.length} regex patterns`);
+        Logger.debug(`[FilePatternMatcher] Loaded ${this.globPatterns.length} glob patterns and ${this.regexPatterns.length} regex patterns`);
     }
 
     /**

@@ -103,7 +103,7 @@ export class VscodeSegmentRepository implements ISegmentRepository {
 
                 const totalSegments = Array.from(this._segmentsByFile.values())
                     .reduce((sum, fs) => sum + fs.segments.size, 0);
-                Logger.info(`Loaded ${totalSegments} persisted segments from ${this._segmentsByFile.size} files`);
+                Logger.debug(`Loaded ${totalSegments} persisted segments from ${this._segmentsByFile.size} files`);
             } else {
                 Logger.debug('No existing segments found - starting fresh');
             }
@@ -220,7 +220,7 @@ export class VscodeSegmentRepository implements ISegmentRepository {
     async clearAll(): Promise<void> {
         this._segmentsByFile.clear();
         await this._persist();
-        Logger.info('Cleared all segments from storage');
+        Logger.debug('Cleared all segments from storage');
     }
 
     async export(): Promise<Record<string, any>> {
@@ -249,7 +249,7 @@ export class VscodeSegmentRepository implements ISegmentRepository {
                 }
             }
 
-            Logger.info(`Imported ${data.segments.length} segments from backup`);
+            Logger.debug(`Imported ${data.segments.length} segments from backup`);
         } catch (error) {
             Logger.error(`Failed to import segments: ${error}`);
             throw error;
