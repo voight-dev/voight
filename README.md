@@ -14,11 +14,43 @@
 
 Voight detects code insertions from AI assistants and organizes them into reviewable segments. When you're moving fast with AI-assisted development, it keeps you oriented without requiring you to stop.
 
-- **Timeline View**: Chronological sequence of AI edits across all files. Useful when changes span multiple files and you need to understand the order.
-- **Segments**: Detected code blocks displayed in a sidebar panel. Click to navigate, review at your own pace.
-- **Complexity Indicators**: Cyclomatic complexity scores per segment. Higher scores indicate denser control flow.
-- **Context Markers**: Attach notes to segments. Useful for flagging code that needs review or documenting intent.
-- **BYOK Explanations**: Request an AI explanation for any segment using your own API key. Independent of the AI that generated the code.
+## Features
+
+### Timeline View
+
+See all AI-generated segments across your workspace in chronological order. Switch between viewing all files or focus on a single file. Each segment shows when it was created and which file it belongs to.
+
+![Timeline View](resources/timeline-view.png)
+
+### All Files View
+
+When working across multiple files, the "All Files" view shows every detected segment with file switching indicators. Easily track the sequence of AI edits across your entire project.
+
+![All Files Timeline](resources/all-timeline-view.png)
+
+### Complexity Indicators
+
+Each segment displays cyclomatic complexity scores. Higher scores indicate denser control flow - useful for identifying code that may need closer review or refactoring.
+
+![Complexity Indicators](resources/complexity.png)
+
+### Diff View
+
+Expand any segment to see what changed. The diff view highlights additions and removals, showing exactly what the AI modified in your code.
+
+![Diff View](resources/diff-view.png)
+
+### AI Explanations (BYOK)
+
+Request an AI explanation for any segment using your own API key. Get a breakdown of what the code does, how it works, and what to watch out for - independent of the AI that generated it.
+
+![AI Explanation](resources/ai-explanation.png)
+
+### Context Notes
+
+Attach notes to any segment. Flag code for review, document your intent, or leave reminders for yourself. Notes persist with the segment and help you stay organized.
+
+![Add Context](resources/add-context.png)
 
 ## Installation
 
@@ -36,8 +68,8 @@ Or search "Voight" in the VS Code Extensions panel.
 git clone https://github.com/voight-dev/voight.git
 cd voight
 pnpm install
-pnpm package
-code --install-extension voight-0.0.1.vsix
+pnpm package:prod
+code --install-extension voight-0.0.5-prod.vsix
 ```
 
 ## Configuration
@@ -105,11 +137,12 @@ pnpm install
 ```
 
 ```bash
-pnpm compile      # Type check + lint + build
-pnpm watch        # Watch mode
-pnpm package      # Production build
-pnpm test         # Run tests
-pnpm dev-install  # Install locally, then reload VS Code
+pnpm compile       # Type check + lint + build
+pnpm watch         # Watch mode
+pnpm package:dev   # Development build with sourcemaps
+pnpm package:prod  # Production build (minified, debug disabled)
+pnpm test          # Run tests
+pnpm dev-install   # Install locally, then reload VS Code
 ```
 
 ## Credits

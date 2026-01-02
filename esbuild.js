@@ -1,7 +1,13 @@
 const esbuild = require("esbuild");
+const fs = require("fs");
+const path = require("path");
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
+
+// Read version from package.json
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf-8'));
+const version = packageJson.version;
 
 /**
  * @type {import('esbuild').Plugin}
@@ -52,6 +58,8 @@ async function main() {
 		define: {
 			'__BUILD_TIMESTAMP__': JSON.stringify(buildTimestamp),
 			'__BUILD_MODE__': JSON.stringify(buildMode),
+			'__PRODUCTION__': JSON.stringify(production),
+			'__VERSION__': JSON.stringify(version),
 		},
 	});
 
