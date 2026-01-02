@@ -1328,6 +1328,16 @@ body {
     font-size: var(--font-size-md);
     flex-shrink: 0;
     margin-top: 2px;
+    color: var(--vscode-errorForeground);
+}
+
+.explanation-error-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.explanation-error-message {
+    word-break: break-word;
 }
 
 .explanation-actions {

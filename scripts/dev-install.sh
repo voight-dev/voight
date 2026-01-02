@@ -49,7 +49,7 @@ fi
 echo ""
 
 # Step 3: Get the extension ID
-EXTENSION_ID="undefined_publisher.voight"
+EXTENSION_ID="SwaritPandey.voight"
 echo "🔍 Extension ID: $EXTENSION_ID"
 echo ""
 

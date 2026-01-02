@@ -277,9 +277,7 @@
 
                     <!-- Code/Diff View Section (only if beforeCode exists) -->
                     ${segment.metadata?.beforeCode ? `
-                    <div class="code-diff-section" data-segment-id="${segment.id}">
-                        <!-- Will be populated with current code or diff view -->
-                    </div>
+                    <div class="code-diff-section" data-segment-id="${segment.id}"></div>
                     ` : ''}
 
                     <!-- Action Footer -->
@@ -291,9 +289,11 @@
                             <button class="action-icon-btn note-btn" title="Add a context note">
                                 <span class="codicon codicon-edit"></span>
                             </button>
+                            ${isTimelineView ? `
                             <button class="action-icon-btn footer-star-btn ${isStarred ? 'starred' : ''}" title="${isStarred ? 'Unstar' : 'Star for later'}" data-starred="${isStarred}">
                                 <span class="codicon codicon-star-${isStarred ? 'full' : 'empty'}"></span>
                             </button>
+                            ` : ''}
                         </div>
                         <button class="action-icon-btn reviewed-btn" title="Mark as reviewed">
                             <span class="codicon codicon-check"></span>
@@ -558,9 +558,7 @@
 
                 <!-- Code/Diff View Section (only if beforeCode exists) -->
                 ${segment.metadata?.beforeCode ? `
-                <div class="code-diff-section" data-segment-id="${segment.id}">
-                    <!-- Will be populated with current code or diff view -->
-                </div>
+                <div class="code-diff-section" data-segment-id="${segment.id}"></div>
                 ` : ''}
 
                 <!-- Action Footer -->
@@ -572,9 +570,11 @@
                         <button class="action-icon-btn note-btn" title="Add a context note">
                             <span class="codicon codicon-edit"></span>
                         </button>
+                        ${isTimelineView ? `
                         <button class="action-icon-btn footer-star-btn ${isStarred ? 'starred' : ''}" title="${isStarred ? 'Unstar' : 'Star for later'}" data-starred="${isStarred}">
                             <span class="codicon codicon-star-${isStarred ? 'full' : 'empty'}"></span>
                         </button>
+                        ` : ''}
                     </div>
                     <button class="action-icon-btn reviewed-btn" title="Mark as reviewed">
                         <span class="codicon codicon-check"></span>
@@ -1596,9 +1596,9 @@
             section.className = 'explanation-section error';
             section.innerHTML = `
                 <div class="explanation-error">
-                    <span class="codicon codicon-warning"></span>
-                    <div>
-                        <div>${escapeHtml(data)}</div>
+                    <span class="codicon codicon-error"></span>
+                    <div class="explanation-error-content">
+                        <div class="explanation-error-message">${escapeHtml(data || 'Unknown error')}</div>
                         <div class="explanation-actions">
                             <button class="regenerate-btn" data-segment-id="${segmentId}">
                                 <span class="codicon codicon-refresh"></span>
@@ -1971,7 +1971,15 @@
             const card = explainBtn.closest('[data-segment-id]');
             if (card) {
                 e.preventDefault();
-                explainSegment(card.dataset.segmentId);
+                const segmentId = card.dataset.segmentId;
+
+                // First, expand the segment if it's not already expanded
+                // so user can see the loading state and result/error
+                if (!card.classList.contains('expanded')) {
+                    toggleSegment(segmentId);
+                }
+
+                explainSegment(segmentId);
             }
             return;
         }

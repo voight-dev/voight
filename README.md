@@ -61,8 +61,9 @@ Regex patterns use `!` prefix: `!/test\d+\.js$/`
 |---------|---------|-------------|
 | `voight.ai.provider` | gemini | `gemini`, `anthropic`, or `openai` |
 | `voight.ai.apiKey` | - | API key for chosen provider |
-| `voight.ai.model` | - | Model override (defaults: gemini-2.0-flash, claude-sonnet-4-20250514, gpt-4o) |
 | `voight.ai.maxTokens` | 2048 | Response token limit (256-8192) |
+
+The extension automatically selects the best available model from your provider.
 
 ### Debug
 

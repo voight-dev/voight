@@ -21,6 +21,19 @@ export interface AIProvider {
      * Get the default model name for this provider
      */
     getDefaultModel(): string;
+
+    /**
+     * List available models from the provider
+     * @returns List of model IDs available for use
+     */
+    listModels(): Promise<string[]>;
+
+    /**
+     * Select the best available model for code explanation
+     * Falls back to default model if listing fails
+     * @returns The model ID to use
+     */
+    selectModel(): Promise<string>;
 }
 
 /**

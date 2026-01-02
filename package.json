@@ -2,8 +2,8 @@
   "name": "voight",
   "displayName": "Voight",
   "description": "Ensures human intent drives AI generation, bridging the gap between speed and understanding.",
-  "version": "0.0.1",
-  "publisher": "voight-dev",
+  "version": "0.0.5",
+  "publisher": "SwaritPandey",
   "license": "MIT",
   "author": {
     "name": "Swarit Pandey",
@@ -211,11 +211,6 @@
           "type": "string",
           "default": "",
           "description": "API key for AI provider (Gemini, Anthropic, or OpenAI)"
-        },
-        "voight.ai.model": {
-          "type": "string",
-          "default": "",
-          "description": "Model to use (optional, defaults to provider's default: gemini-2.0-flash, claude-sonnet-4-20250514, or gpt-4o)"
         },
         "voight.ai.maxTokens": {
           "type": "number",

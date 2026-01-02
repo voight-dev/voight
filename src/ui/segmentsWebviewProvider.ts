@@ -189,8 +189,12 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
                         await vscode.window.showTextDocument(uri);
                         // Set this as the last viewed file so segments persist
                         this._lastViewedFilePath = message.filePath;
-                        // Reset all files mode when selecting a specific file
+                        // Reset all files mode and switch to line sort when selecting a specific file
                         this._showAllFiles = false;
+                        this._currentSortMode = 'line'; // Reset to default sort mode for single file view
+                        // Explicitly update segments to reflect the change immediately
+                        this._updateSegments();
+                        this._updateBadge();
                     }
                     break;
 
@@ -833,6 +837,13 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
             // Update badge after AI explanation
             this._updateBadge();
 
+            // Clear loading state on success
+            this._view?.webview.postMessage({
+                command: 'explanationLoading',
+                segmentId,
+                loading: false
+            });
+
             // Send success
             this._view?.webview.postMessage({
                 command: 'updateExplanation',
@@ -844,20 +855,18 @@ export class SegmentsWebviewProvider implements vscode.WebviewViewProvider {
 
         } catch (error) {
             Logger.error(`[SegmentsWebviewProvider] Explanation error: ${error}`);
-            const errorMessage = error instanceof Error ? error.message : 'Failed to explain code';
+
+            // Show the actual error message to the user
+            const errorMessage = error instanceof Error
+                ? `Failed to generate explanation: ${error.message}`
+                : 'Failed to generate explanation: Unknown error';
 
             this._view?.webview.postMessage({
                 command: 'explanationError',
                 segmentId,
                 error: errorMessage
             });
-        } finally {
-            // Clear loading state
-            this._view?.webview.postMessage({
-                command: 'explanationLoading',
-                segmentId,
-                loading: false
-            });
+            // Note: Don't clear loading state on error - the error display replaces it
         }
     }
 

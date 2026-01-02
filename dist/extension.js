@@ -9697,10 +9697,17 @@ var sdk_default = Anthropic;
 
 // src/ai/anthropicProvider.ts
 var DEFAULT_MODEL = "claude-sonnet-4-20250514";
+var PREFERRED_MODELS = [
+  "claude-sonnet-4",
+  "claude-3-5-sonnet",
+  "claude-3-sonnet",
+  "claude-3-haiku"
+];
 var AnthropicProvider = class {
   name = "anthropic";
   client = null;
   config;
+  selectedModel = null;
   constructor(config) {
     this.config = config;
     if (config.apiKey) {
@@ -9713,11 +9720,57 @@ var AnthropicProvider = class {
   getDefaultModel() {
     return DEFAULT_MODEL;
   }
+  async listModels() {
+    if (!this.client || !this.config.apiKey) {
+      return [];
+    }
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/models", {
+        headers: {
+          "x-api-key": this.config.apiKey,
+          "anthropic-version": "2023-06-01"
+        }
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      return (data.data || []).map((m2) => m2.id);
+    } catch {
+      return [];
+    }
+  }
+  async selectModel() {
+    if (this.selectedModel) {
+      return this.selectedModel;
+    }
+    try {
+      const availableModels = await this.listModels();
+      if (availableModels.length > 0) {
+        for (const preferred of PREFERRED_MODELS) {
+          const found = availableModels.find((m2) => m2.includes(preferred));
+          if (found) {
+            this.selectedModel = found;
+            return this.selectedModel;
+          }
+        }
+        const claudeModel = availableModels.find((m2) => m2.startsWith("claude"));
+        if (claudeModel) {
+          this.selectedModel = claudeModel;
+          return this.selectedModel;
+        }
+      }
+    } catch {
+    }
+    this.selectedModel = DEFAULT_MODEL;
+    return this.selectedModel;
+  }
   async explain(code, language) {
     if (!this.client) {
-      throw new Error("Anthropic API key not configured");
+      throw new Error("Anthropic API key not configured. Please add your API key in Settings \u2192 Voight \u2192 AI \u2192 API Key");
     }
-    const model = this.config.model || DEFAULT_MODEL;
+    const model = await this.selectModel();
     const prompt = `You are a code explanation assistant. Explain the following ${language} code in clear, concise terms. Focus on:
 - What the code does (purpose)
 - How it works (logic flow)
@@ -9734,16 +9787,23 @@ ${code}
 \`\`\`
 
 Provide your explanation in markdown format.`;
-    const message = await this.client.messages.create({
-      model,
-      max_tokens: this.config.maxTokens || 2048,
-      messages: [{
-        role: "user",
-        content: prompt
-      }]
-    });
-    const textContent = message.content.find((c2) => c2.type === "text");
-    return textContent && "text" in textContent ? textContent.text : "No explanation generated";
+    try {
+      const message = await this.client.messages.create({
+        model,
+        max_tokens: this.config.maxTokens || 2048,
+        messages: [{
+          role: "user",
+          content: prompt
+        }]
+      });
+      const textContent = message.content.find((c2) => c2.type === "text");
+      return textContent && "text" in textContent ? textContent.text : "No explanation generated";
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Anthropic API error: ${error.message}`);
+      }
+      throw error;
+    }
   }
 };
 
@@ -16027,10 +16087,18 @@ var openai_default = OpenAI;
 
 // src/ai/openaiProvider.ts
 var DEFAULT_MODEL2 = "gpt-4o";
+var PREFERRED_MODELS2 = [
+  "gpt-4o",
+  "gpt-4o-mini",
+  "gpt-4-turbo",
+  "gpt-4",
+  "gpt-3.5-turbo"
+];
 var OpenAIProvider = class {
   name = "openai";
   client = null;
   config;
+  selectedModel = null;
   constructor(config) {
     this.config = config;
     if (config.apiKey) {
@@ -16043,16 +16111,50 @@ var OpenAIProvider = class {
   getDefaultModel() {
     return DEFAULT_MODEL2;
   }
+  async listModels() {
+    if (!this.client) {
+      return [];
+    }
+    try {
+      const response = await this.client.models.list();
+      return response.data.filter((m2) => m2.id.startsWith("gpt-")).map((m2) => m2.id);
+    } catch {
+      return [];
+    }
+  }
+  async selectModel() {
+    if (this.selectedModel) {
+      return this.selectedModel;
+    }
+    try {
+      const availableModels = await this.listModels();
+      if (availableModels.length > 0) {
+        for (const preferred of PREFERRED_MODELS2) {
+          const found = availableModels.find((m2) => m2 === preferred || m2.startsWith(preferred + "-"));
+          if (found) {
+            this.selectedModel = found;
+            return this.selectedModel;
+          }
+        }
+        this.selectedModel = availableModels[0];
+        return this.selectedModel;
+      }
+    } catch {
+    }
+    this.selectedModel = DEFAULT_MODEL2;
+    return this.selectedModel;
+  }
   async explain(code, language) {
     if (!this.client) {
-      throw new Error("OpenAI API key not configured");
+      throw new Error("OpenAI API key not configured. Please add your API key in Settings \u2192 Voight \u2192 AI \u2192 API Key");
     }
-    const model = this.config.model || DEFAULT_MODEL2;
-    const completion = await this.client.chat.completions.create({
-      model,
-      messages: [{
-        role: "system",
-        content: `You are a code explanation assistant. Explain code clearly and concisely. Focus on:
+    const model = await this.selectModel();
+    try {
+      const completion = await this.client.chat.completions.create({
+        model,
+        messages: [{
+          role: "system",
+          content: `You are a code explanation assistant. Explain code clearly and concisely. Focus on:
 - What the code does (purpose)
 - How it works (logic flow)
 - Any notable patterns or techniques
@@ -16060,19 +16162,25 @@ var OpenAIProvider = class {
 
 Be concise and avoid unnecessary verbosity. Provide a quick overview that helps a fellow developer understand the code quickly.
 Keep things easy, clear, precise and helpful.`
-      }, {
-        role: "user",
-        content: `Explain this ${language} code:
+        }, {
+          role: "user",
+          content: `Explain this ${language} code:
 
 \`\`\`${language}
 ${code}
 \`\`\`
 
 Provide your explanation in markdown format.`
-      }],
-      max_tokens: this.config.maxTokens || 2048
-    });
-    return completion.choices[0]?.message?.content || "No explanation generated";
+        }],
+        max_tokens: this.config.maxTokens || 2048
+      });
+      return completion.choices[0]?.message?.content || "No explanation generated";
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`OpenAI API error: ${error.message}`);
+      }
+      throw error;
+    }
   }
 };
 
@@ -17040,10 +17148,17 @@ var GoogleGenerativeAI = class {
 
 // src/ai/geminiProvider.ts
 var DEFAULT_MODEL3 = "gemini-2.0-flash";
+var PREFERRED_MODELS3 = [
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro",
+  "gemini-pro"
+];
 var GeminiProvider = class {
   name = "gemini";
   client = null;
   config;
+  selectedModel = null;
   constructor(config) {
     this.config = config;
     if (config.apiKey) {
@@ -17056,11 +17171,55 @@ var GeminiProvider = class {
   getDefaultModel() {
     return DEFAULT_MODEL3;
   }
+  async listModels() {
+    if (!this.client || !this.config.apiKey) {
+      return [];
+    }
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${this.config.apiKey}`
+      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      return (data.models || []).filter((m2) => m2.supportedGenerationMethods?.includes("generateContent")).map((m2) => m2.name.replace("models/", ""));
+    } catch (error) {
+      return [];
+    }
+  }
+  async selectModel() {
+    if (this.selectedModel) {
+      return this.selectedModel;
+    }
+    try {
+      const availableModels = await this.listModels();
+      if (availableModels.length > 0) {
+        for (const preferred of PREFERRED_MODELS3) {
+          if (availableModels.some((m2) => m2.includes(preferred))) {
+            this.selectedModel = availableModels.find((m2) => m2.includes(preferred));
+            return this.selectedModel;
+          }
+        }
+        this.selectedModel = availableModels[0];
+        return this.selectedModel;
+      }
+    } catch {
+    }
+    this.selectedModel = DEFAULT_MODEL3;
+    return this.selectedModel;
+  }
   async explain(code, language) {
     if (!this.client) {
-      throw new Error("Gemini API key not configured");
+      throw new Error("Gemini API key not configured. Please add your API key in Settings \u2192 Voight \u2192 AI \u2192 API Key");
     }
-    const modelName = this.config.model || DEFAULT_MODEL3;
+    let modelName;
+    try {
+      modelName = await this.selectModel();
+    } catch (error) {
+      modelName = DEFAULT_MODEL3;
+    }
     const model = this.client.getGenerativeModel({
       model: modelName
     });
@@ -17082,14 +17241,21 @@ ${code}
 \`\`\`
 
 Provide your explanation in markdown format.`;
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        maxOutputTokens: this.config.maxTokens || 2048
+    try {
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: this.config.maxTokens || 2048
+        }
+      });
+      const response = result.response;
+      return response.text() || "No explanation generated";
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Gemini API error: ${error.message}`);
       }
-    });
-    const response = result.response;
-    return response.text() || "No explanation generated";
+      throw error;
+    }
   }
 };
 
@@ -21369,6 +21535,9 @@ var SegmentsWebviewProvider = class {
             await vscode13.window.showTextDocument(uri);
             this._lastViewedFilePath = message.filePath;
             this._showAllFiles = false;
+            this._currentSortMode = "line";
+            this._updateSegments();
+            this._updateBadge();
           }
           break;
         case "showAllFiles":
@@ -21838,6 +22007,11 @@ var SegmentsWebviewProvider = class {
       block.metadata.explainedBy = provider.name;
       this._updateBadge();
       this._view?.webview.postMessage({
+        command: "explanationLoading",
+        segmentId,
+        loading: false
+      });
+      this._view?.webview.postMessage({
         command: "updateExplanation",
         segmentId,
         explanation
@@ -21845,17 +22019,11 @@ var SegmentsWebviewProvider = class {
       Logger.debug(`[SegmentsWebviewProvider] Explanation generated successfully`);
     } catch (error) {
       Logger.error(`[SegmentsWebviewProvider] Explanation error: ${error}`);
-      const errorMessage = error instanceof Error ? error.message : "Failed to explain code";
+      const errorMessage = error instanceof Error ? `Failed to generate explanation: ${error.message}` : "Failed to generate explanation: Unknown error";
       this._view?.webview.postMessage({
         command: "explanationError",
         segmentId,
         error: errorMessage
-      });
-    } finally {
-      this._view?.webview.postMessage({
-        command: "explanationLoading",
-        segmentId,
-        loading: false
       });
     }
   }
@@ -22786,7 +22954,7 @@ async function activate(context) {
       modeString = "Test Mode";
       break;
   }
-  const buildTimestamp = true ? "2026-01-02T01:36:45.684Z" : "unknown";
+  const buildTimestamp = true ? "2026-01-02T06:14:42.754Z" : "unknown";
   const buildMode = true ? "development" : "unknown";
   Logger.info(`Voight v${version} activated`);
   Logger.debug(`Extension mode: ${modeString}`);
