@@ -145,6 +145,30 @@ pnpm test          # Run tests
 pnpm dev-install   # Install locally, then reload VS Code
 ```
 
+## Releasing
+
+The release script automates version bumping, building, git tagging, and pushing.
+
+```bash
+# Automatic version bumps (follows semver)
+pnpm release:patch   # 0.0.5 -> 0.0.6
+pnpm release:minor   # 0.0.5 -> 0.1.0
+pnpm release:major   # 0.0.5 -> 1.0.0
+
+# Manual version override
+pnpm release 0.2.0   # Set specific version
+
+# Dry run (preview without making changes)
+pnpm release:dry patch
+```
+
+The release script will:
+1. Update `package.json` version
+2. Build production vsix (`voight-x.y.z-prod.vsix`)
+3. Create git commit (`chore(release): vx.y.z`)
+4. Create git tag (`vx.y.z`)
+5. Push commit and tag to origin
+
 ## Credits
 
 Complexity analysis ported from [Lizard](https://github.com/terryyin/lizard) by Terry Yin.
