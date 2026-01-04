@@ -34,7 +34,7 @@ importers:
         specifier: 22.x
         version: 22.19.1
       '@types/vscode':
-        specifier: ^1.106.1
+        specifier: ^1.105.1
         version: 1.106.1
       '@vscode-elements/elements':
         specifier: ^2.3.1
