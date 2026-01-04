@@ -37,7 +37,7 @@
     "openai"
   ],
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.105.1"
   },
   "categories": [
     "Other"
