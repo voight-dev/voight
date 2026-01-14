@@ -57,7 +57,7 @@ Attach notes to any segment. Flag code for review, document your intent, or leav
 ### From Marketplace
 
 ```
-ext install voight-dev.voight
+ext install SwaritPandey.voight
 ```
 
 Or search "Voight" in the VS Code Extensions panel.

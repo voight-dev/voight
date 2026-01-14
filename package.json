@@ -7,7 +7,7 @@
   },
   "displayName": "Voight",
   "description": "Ensures human intent drives AI generation, bridging the gap between speed and understanding.",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "publisher": "SwaritPandey",
   "license": "MIT",
   "author": {
@@ -37,7 +37,7 @@
     "openai"
   ],
   "engines": {
-    "vscode": "^1.105.1"
+    "vscode": "^1.104.0"
   },
   "categories": [
     "Other"
@@ -255,7 +255,7 @@
     "@types/diff": "^8.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "@types/vscode": "^1.105.1",
+    "@types/vscode": "^1.104.0",
     "@vscode-elements/elements": "^2.3.1",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
